@@ -27,6 +27,7 @@ object worksheet1 {
   val foundNumber = findFirstPol(listOfNumbers,(x: Int) => x == 4)
   println(foundNumber)
 
+  //2.1
   // write a recursive function to get the nth of the Fibonacci number
   // 0, 1, 1, 2, 3, 5
   // Your definition should use a local tail-recursive function.
@@ -83,4 +84,31 @@ object worksheet1 {
 
   val isArraySorted = isSorted(Array(2,3,3), ascending)
   val isArraySortedDesc = isSorted(Array(4,3,2), descending)
+
+  //partial
+  def partial[A, B, C](a: A, f: (A, B) => C) : B => C = {
+    //(b: B) => f(a, b)
+    b => f(a, b)
+  }
+
+  //2.3
+  def curry[A, B, C](f: (A, B) => C) : A => (B => C) = {
+    //(a: A) => ((b: B) => f(a,b))
+    a => (b => f(a, b))
+  }
+
+  //2.4
+  def uncurry[A, B, C](f: A => B => C) : (A, B) => C = {
+    //(a: A, b: B) => f(a)(b)
+    (a, b) => f(a)(b)
+  }
+
+  //2.5
+  def compose[A,B,C](f: B => C, g: A => B): A => C = {
+    //output of the inner function becomes the input of the outer function
+    //g takes A and outputs B, f takes B and outputs C
+    //compose takes A and return C
+    //(a: A) => f(g(a))
+    a => f(g(a))
+  }
 }
