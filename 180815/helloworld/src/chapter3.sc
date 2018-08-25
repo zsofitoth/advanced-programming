@@ -17,6 +17,11 @@ object List {
   def apply[A](as: A*): List[A] =
     if (as.isEmpty) Nil
     else Cons(as.head, apply(as.tail: _*))
+
+  def tail[A](as: List[A]): List[A] = as match {
+    case Nil => as
+    case Cons(_, xs) => xs
+  }
 }
 
 //List(1,2,3) match {case _ => 42}
@@ -33,6 +38,9 @@ val x = List(1,2,3,4,5) match {
     //case Cons(x, Cons(y, Cons(3, Cons(4, _)))) => x + y
     case Cons(h, t) => h + List.sum(t)
 }
+
+List.tail(List(1,2,3,4,5))
+List.tail(List())
 
 
 
