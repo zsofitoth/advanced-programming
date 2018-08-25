@@ -19,20 +19,7 @@ object List {
     else Cons(as.head, apply(as.tail: _*))
 }
 
-//List(1,2,3) match {case _ => 42}
-//List(1,2,3) match {case Cons(h, _) => h}
-//List(1,2,3) match {case Cons(_, t) => t}
-//List(1,2,3) match {case Nil => 42}
-
-//3.1
-val x = List(1,2,3,4,5) match {
-    //case Cons(x, Cons(2, Cons(4, _))) => x
-    //case Cons(1, Cons(2, x)) => x
-    //case Nil => 42
-    //case _ => 101
-    //case Cons(x, Cons(y, Cons(3, Cons(4, _)))) => x + y
-    case Cons(h, t) => h + List.sum(t)
-}
-
+val match1 = List(1,2,3) match {case _ => 42}
+val match2 = List(1,2,3) match {case Cons(h, _) => h}
 
 
