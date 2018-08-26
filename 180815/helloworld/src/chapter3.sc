@@ -68,6 +68,37 @@ object List {
     }
     go(l)
   }
+
+  //tail recursive
+  @annotation.tailrec
+  def foldLeft[A,B](as: List[A], z: B)(f: (A, B) => B) : B = as match {
+    case Nil => z
+    case Cons(x,xs) => foldLeft(xs, f(x, z))(f)
+  }
+
+  def foldRight[A, B](as: List[A], z: B)(f: (A, B) => B) : B = as match{
+    case Nil => z
+    case Cons(x, xs) => f(x, foldRight(xs, z)(f))
+  }
+
+  def sum2(ns: List[Int]): Int =
+    foldRight(ns, 0)((x,y) => x + y)
+
+  def product2(ns: List[Double]): Double =
+    foldRight(ns, 1.0)(_*_) //same as ((x,y) => x * y)
+
+  def length[A](l: List[A]): Int =
+    foldRight(l, 0)((_, acc) => acc + 1)
+
+  def sum2TailRec(ns: List[Int]): Int =
+    foldLeft(ns, 0)((x,y) => x + y)
+
+  def product2TailRec(ns: List[Double]): Double =
+    foldLeft(ns, 1.0)(_*_) //same as ((x,y) => x * y)
+
+  def lengthTailRec[A](l: List[A]): Int =
+    foldLeft(l, 0)((_, acc) => acc + 1)
+
 }
 
 //List(1,2,3) match {case _ => 42}
@@ -99,6 +130,11 @@ List.dropWhile(List(4,4,3,4,5), dropWhileCondition)
 
 List.dropWhile(List(4,4,3,4,5), (x: Int) => x <= 4)
 List.init(List(4,4,3,4,5))
+
+List.foldRight(List(1,2,3), Nil: List[Int])(Cons(_,_))
+
+List.length(List(1,2,3,4,7))
+
 
 
 
