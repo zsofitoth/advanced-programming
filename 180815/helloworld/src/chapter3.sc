@@ -49,6 +49,25 @@ object List {
       case Cons(h,t) => Cons(h, append(t, a2))
     }
   }
+
+  def init[A](l: List[A]): List[A] = l match {
+    case Nil => l
+    case Cons(_, Nil) => Nil
+    case Cons(x, xs) => Cons(x, init(xs))
+  }
+
+  // optimized for tail recursion using a mutable list buffer
+  def init2[A](l: List[A]): List[A] = {
+    import collection.mutable.ListBuffer
+    val buf = new ListBuffer[A]
+    @annotation.tailrec
+    def go(cur: List[A]): List[A] = cur match {
+      case Nil => sys.error("init of empty list")
+      case Cons(_,Nil) => List(buf.toList: _*)
+      case Cons(h,t) => buf += h; go(t)
+    }
+    go(l)
+  }
 }
 
 //List(1,2,3) match {case _ => 42}
@@ -77,6 +96,9 @@ List.drop(List(), 4)
 
 def dropWhileCondition (a: Int): Boolean = a == 4
 List.dropWhile(List(4,4,3,4,5), dropWhileCondition)
+
+List.dropWhile(List(4,4,3,4,5), (x: Int) => x <= 4)
+List.init(List(4,4,3,4,5))
 
 
 
