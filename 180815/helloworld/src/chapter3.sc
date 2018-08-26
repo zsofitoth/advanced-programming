@@ -99,6 +99,12 @@ object List {
   def lengthTailRec[A](l: List[A]): Int =
     foldLeft(l, 0)((_, acc) => acc + 1)
 
+  def add1(l: List[Int]): List[Int] =
+    foldLeft(l, Nil:List[Int])((h,t) => Cons(h+1,t))
+
+  def doubleToString(l: List[Double]): List[String] =
+    foldLeft(l, Nil:List[String])((h,t) => Cons(h.toString, t))
+
 }
 
 //List(1,2,3) match {case _ => 42}
@@ -134,6 +140,7 @@ List.init(List(4,4,3,4,5))
 List.foldRight(List(1,2,3), Nil: List[Int])(Cons(_,_))
 
 List.length(List(1,2,3,4,7))
+
 
 
 
