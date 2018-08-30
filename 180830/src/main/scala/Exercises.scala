@@ -29,8 +29,6 @@ object Exercises extends App with ExercisesInterface {
 
   // Exercise 3
 
-  // add @annotation.tailrec to make the compiler check that your solution is
-  // tail recursive
   def fib (n: Int) : Int = {
     @annotation.tailrec
     def loop(n: Int, cur: Int, prev: Int) : Int = {
@@ -43,8 +41,6 @@ object Exercises extends App with ExercisesInterface {
 
   // Exercise 4
 
-  // add @annotation.tailrec to make the compiler check that your solution is
-  // tail recursive
   def isSorted[A] (as: Array[A], ordered: (A,A) =>  Boolean) :Boolean = {
     @annotation.tailrec
     def loop(as: Array[A], n:Int, ordered: (A,A) =>  Boolean): Boolean = {
@@ -93,9 +89,6 @@ object Exercises extends App with ExercisesInterface {
 
   // Exercise 10
 
-  // @annotation.tailrec
-  // Uncommment the annotation after solving to make the
-  // compiler check whether you made the solution tail recursive
   @annotation.tailrec
   def drop[A] (l: List[A], n: Int) : List[A] = {
     if(n==0) l
@@ -107,9 +100,6 @@ object Exercises extends App with ExercisesInterface {
 
   // Exercise 11
 
-  // @annotation.tailrec
-  // Uncommment the annotation after solving to make the
-  // compiler check whether you made the solution tail recursive
   @annotation.tailrec
   def dropWhile[A](l: List[A], f: A => Boolean): List[A] = l match {
     case Nil => l
@@ -118,25 +108,42 @@ object Exercises extends App with ExercisesInterface {
   }
 
   // Exercise 12
-  
-  def init[A](l: List[A]): List[A] = ???
+
+  def init[A](l: List[A]): List[A] = l match {
+    //last element of the list is "anyting" and that points to Nil
+    //hence the break condition is the list matches that and we "earase" the last element before the Nil by just simply giving back Nil
+    case Nil => sys.error("empty list")
+    case Cons(_, Nil) => Nil
+    //we call init recursively to "create" the new list
+    //this call is NOT tail recursive 
+    case Cons(h, t) => Cons(h, init(t))
+  }
+
+  def foldRight[A,B](as: List[A], z: B)(f: (A, B) => B) : B = as match {
+    case Nil => z
+    case Cons(h, t) => f(h, foldRight(t, z)(f))
+  }
 
   // Exercise 13
 
-  def length[A] (as: List[A]): Int = ???
+  def length[A] (as: List[A]): Int = 
+    foldRight(as, 0)((_, x) => x + 1)
 
   // Exercise 14
 
-  // @annotation.tailrec
-  // Uncommment the annotation after solving to make the
-  // compiler check whether you made the solution tail recursive
-  def foldLeft[A,B] (as: List[A], z: B) (f: (B, A) => B): B = ???
+  @annotation.tailrec
+  def foldLeft[A,B] (as: List[A], z: B) (f: (B, A) => B): B = as match {
+    case Nil => z
+    case Cons(h, t) => foldLeft(t, f(z, h))(f)
+  }
 
   // Exercise 15
 
-  def product (as: List[Int]): Int = ???
+  def product (as: List[Int]): Int = 
+    foldLeft(as, 1)( _ * _ )
 
-  def length1 (as: List[Int]): Int = ???
+  def length1 (as: List[Int]): Int = 
+    foldLeft(as, 0)((x, _) => x + 1)
 
   // Exercise 16
 
