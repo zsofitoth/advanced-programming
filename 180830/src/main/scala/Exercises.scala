@@ -118,7 +118,7 @@ object Exercises extends App with ExercisesInterface {
   }
 
   // Exercise 12
-
+  
   def init[A](l: List[A]): List[A] = ???
 
   // Exercise 13
