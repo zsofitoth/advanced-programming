@@ -125,8 +125,6 @@ object List {
 
   def foldRightViaFoldLeft[A](as: List[A], z: B)(f: (A, B) => B): B = 
     foldLeft(reverseViaFoldLeft(as), z)((b, a) => f(a, b))
-  
-  def concat[A](as: List[A]): List[A] = ???
 
   def transform(as: List[Int]) : List[Int] = 
     foldRight(as, Nil: List[Int])((h, z) => Cons(h + 1, z) )
@@ -140,7 +138,24 @@ object List {
   def filter[A](as: List[A])(f: A => Boolean): List[A] = 
     foldRight(as, Nil: List[A])((h, z) => if(f(h)) z else Cons(h, z))
 
-  def flatMap[A, B](as: List[A])(f: A => List[B]): List[B] = ???
+  def concat[A](as: List[List[A]]): List[A] = 
+    foldRight(as, Nil: List[A])((h, z) => append(h, z))
+  /*
+     List(List(1,2), List(3,4))
+     => Cons(Cons(1,Cons(2,Nil)),Cons(Cons(3,Cons(4,Nil)),Nil))
+     1. h: Cons(3,Cons(4,Nil)), z: Nil => append(h,z) => Cons(3,Cons(4,Nil)) <= new z
+     2. h: Cons(1,Cons(2,Nil)), z: Cons(3,Cons(4,Nil)) => Cons(1, Cons(2, Cons(3, Cons(4, Nil))))
+
+     A. append(List(3,4), Nil) => List(3, 4)
+     B. append(List(1, 2), List(3, 4)) => List(1, 2, 3, 4)
+  */
+
+  def flatMap[A, B](as: List[A])(f: A => List[B]): List[B] = 
+    foldRight(map(as)(f), Nil: List[B])((h, z) => append(h, z))
+    //concat(map(as)(f))
+
+  def filterViaFlatMap[A] (l: List[A]) (p: A => Boolean) :List[A] = 
+    flatMap(l)(a => if (p(a)) List(a) else Nil)
 
   //List(1,2,3,4) and List(3,4,6) will produce List(4,6,9)
   def add (l: List[Int]) (r: List[Int]): List[Int] = (l, r) match {
@@ -154,6 +169,8 @@ object List {
       case (Nil, _) => Nil
       case (Cons(h1, t1), Cons(h2, t2)) => Cons(f(h1, h2), zipWith(f)(t1, t2))
   }
+
+  def pascal (n: Int): List[Int] = ???
 
 }
 
@@ -198,18 +215,28 @@ object ListMain extends App {
 
   val reverseViaFoldLeftResult = List.reverseViaFoldLeft(as)
 
-  println(appendedListFromRight)
-  println(appendedListFromLeft)
+  //println(appendedListFromRight)
+  //println(appendedListFromLeft)
 
   val listOfLists = List(1,2,3, List(1,2,3))
-  println(listOfLists)
+  //println(listOfLists)
 
   val transformedList = List.transform(as)
-  println(transformedList)
+  //println(transformedList)
 
   val transformedListToString = List.transformToString(asDouble)
-  println(transformedListToString)
+  //println(transformedListToString)
   
   val filterList = List.filter(asToBeFiltered)(a => a%2 == 1)
-  println(filterList)
+  //println(filterList)
+
+  //println(List(List(1, 2), List(3, 4)))
+
+  //val appendList = List.append(List(1), Nil: List[Int])
+  //println(appendList)
+
+  def g(v: Int) = List(v-1, v, v+1)
+  val flattenedMappedList = List.flatMap(as)(g)
+  println(flattenedMappedList)
+
 }

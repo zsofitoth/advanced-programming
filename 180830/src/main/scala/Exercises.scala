@@ -118,11 +118,6 @@ object Exercises extends App with ExercisesInterface {
     case Cons(h, t) => Cons(h, init(t))
   }
 
-  def foldRight[A,B](as: List[A], z: B)(f: (A, B) => B) : B = as match {
-    case Nil => z
-    case Cons(h, t) => f(h, foldRight(t, z)(f)) 
-  }
-
   // Exercise 13
 
   def length[A] (as: List[A]): Int = 
@@ -171,7 +166,11 @@ object Exercises extends App with ExercisesInterface {
     case Cons(h,t) => Cons(h, append(t, a2))
   }
 
-  def concat[A] (as: List[List[A]]): List[A] = ???
+  def map[A,B](as: List[A])(f: A => B): List[B] = 
+    foldRight(as, Nil: List[B])((h, z) => Cons(f(h), z))
+
+  def concat[A] (as: List[List[A]]): List[A] = 
+    foldRight(as, Nil: List[A])(append)
 
   // Exercise 20
 
@@ -180,11 +179,13 @@ object Exercises extends App with ExercisesInterface {
 
   // Exercise 21
 
-  def flatMap[A,B](as: List[A])(f: A => List[B]): List[B] = ???
+  def flatMap[A,B](as: List[A])(f: A => List[B]): List[B] = 
+    concat(map(as)(f))
 
   // Exercise 22
 
-  def filter1[A] (l: List[A]) (p: A => Boolean) :List[A] = ???
+  def filter1[A] (l: List[A]) (p: A => Boolean) :List[A] = 
+    flatMap(l)(a => if (p(a)) List(a) else Nil)
 
   // Exercise 23
 
