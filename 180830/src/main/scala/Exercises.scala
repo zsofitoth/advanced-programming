@@ -41,9 +41,9 @@ object Exercises extends App with ExercisesInterface {
 
   // Exercise 4
 
-  def isSorted[A] (as: Array[A], ordered: (A,A) =>  Boolean) :Boolean = {
+  def isSorted[A] (as: Array[A], ordered: (A,A) =>  Boolean) : Boolean = {
     @annotation.tailrec
-    def loop(as: Array[A], n:Int, ordered: (A,A) =>  Boolean): Boolean = {
+    def loop(as: Array[A], n:Int, ordered: (A,A) =>  Boolean) : Boolean = {
       if (n == as.length-1) true
       else if (ordered(as(n), as(n+1)) == false) false
       else loop(as, n + 1, ordered)
@@ -54,7 +54,7 @@ object Exercises extends App with ExercisesInterface {
 
   // Exercise 5
 
-  def curry[A,B,C] (f: (A,B)=>C): A => (B => C) = {
+  def curry[A,B,C] (f: (A,B) => C): A => (B => C) = {
     (a: A) => (b: B) => f(a,b)
     //a => (b => f(a,b))
   }
@@ -115,13 +115,12 @@ object Exercises extends App with ExercisesInterface {
     case Nil => sys.error("empty list")
     case Cons(_, Nil) => Nil
     //we call init recursively to "create" the new list
-    //this call is NOT tail recursive 
     case Cons(h, t) => Cons(h, init(t))
   }
 
   def foldRight[A,B](as: List[A], z: B)(f: (A, B) => B) : B = as match {
     case Nil => z
-    case Cons(h, t) => f(h, foldRight(t, z)(f))
+    case Cons(h, t) => f(h, foldRight(t, z)(f)) 
   }
 
   // Exercise 13
@@ -131,10 +130,16 @@ object Exercises extends App with ExercisesInterface {
 
   // Exercise 14
 
+  //z is the initial value
   @annotation.tailrec
   def foldLeft[A,B] (as: List[A], z: B) (f: (B, A) => B): B = as match {
     case Nil => z
     case Cons(h, t) => foldLeft(t, f(z, h))(f)
+
+    //1. List(2, 3, 4), f(z, 1) = acc = new z
+    //2. List(3, 4), f(acc, 2)
+    //3. List(4), f(acc, 3)
+    //4. Nil, f(acc, 4)
   }
 
   // Exercise 15
@@ -147,11 +152,13 @@ object Exercises extends App with ExercisesInterface {
 
   // Exercise 16
 
-  def reverse[A] (as: List[A]): List[A] = ???
+  def reverse[A] (as: List[A]): List[A] = 
+    foldLeft(as, Nil: List[A])((z, h) => Cons(h, z)) //z is the accumulated value
 
   // Exercise 17
 
-  def foldRight1[A,B] (as: List[A], z: B) (f: (A, B) => B): B = ???
+  def foldRight1[A,B] (as: List[A], z: B) (f: (A, B) => B): B = 
+    foldLeft(reverse(as), z)((b, a) => f(a, b))
 
   // Exercise 18
 
@@ -168,7 +175,8 @@ object Exercises extends App with ExercisesInterface {
 
   // Exercise 20
 
-  def filter[A] (as: List[A]) (f: A => Boolean): List[A] = ???
+  def filter[A] (as: List[A]) (f: A => Boolean): List[A] = 
+    foldRight(as, Nil: List[A])((h, t) => if(f(h)) Cons(h, t) else t )
 
   // Exercise 21
 
@@ -180,11 +188,19 @@ object Exercises extends App with ExercisesInterface {
 
   // Exercise 23
 
-  def add (l: List[Int]) (r: List[Int]): List[Int] = ???
+  def add (l: List[Int]) (r: List[Int]): List[Int] = (l, r) match {
+      case (_, Nil) => Nil
+      case (Nil, _) => Nil
+      case (Cons(h1, t1), Cons(h2, t2)) => Cons(h1 + h2, add(t1)(t2))
+  }
 
   // Exercise 24
 
-  def zipWith[A,B,C] (f: (A,B)=>C) (l: List[A], r: List[B]): List[C] = ???
+  def zipWith[A,B,C] (f: (A,B)=>C) (l: List[A], r: List[B]): List[C] = (l, r) match {
+      case (_, Nil) => Nil
+      case (Nil, _) => Nil
+      case (Cons(h1, t1), Cons(h2, t2)) => Cons(f(h1, h2), zipWith(f)(t1, t2))
+  }
 
   // Exercise 25
 
