@@ -170,7 +170,21 @@ object List {
       case (Cons(h1, t1), Cons(h2, t2)) => Cons(f(h1, h2), zipWith(f)(t1, t2))
   }
 
-  def pascal (n: Int): List[Int] = ???
+  def calculateLists(l: List[Int]) (lt: List[Int]): List[Int] = (l, lt) match {
+    case (_, Nil) => l
+    case (Nil, _) => Nil
+    case (Cons(h1, t1), Cons(h2, t2)) => Cons(h1 + h2, calculateLists(t1) (t2))
+  }
+
+  def pascal (n: Int): List[Int] = {
+      
+      def loop(l: List[Int], n: Int): List[Int] = {
+        if (n==1) l
+        else loop(Cons(1, calculateLists(l)(List.tail(l))), n-1)
+      }
+
+      loop(List(1), n)
+  }
 
 }
 
@@ -237,6 +251,9 @@ object ListMain extends App {
 
   def g(v: Int) = List(v-1, v, v+1)
   val flattenedMappedList = List.flatMap(as)(g)
-  println(flattenedMappedList)
+  //println(flattenedMappedList)
+
+  val pascalList = List.pascal(5)
+  println(pascalList)
 
 }
