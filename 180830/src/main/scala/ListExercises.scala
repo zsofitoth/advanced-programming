@@ -186,6 +186,10 @@ object List {
       loop(List(1), n)
   }
 
+  def hasSubsequence[A] (sup: List[A], sub: List[A]): Boolean = ???
+
+  def foldLeftViaFoldRight[A,B] (as: List[A], z: B) (f: (B,A) => B): B = ???
+
 }
 
 object ListMain extends App {
