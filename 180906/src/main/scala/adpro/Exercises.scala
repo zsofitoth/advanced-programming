@@ -110,7 +110,10 @@ sealed trait Option[+A] {
 
   // Exercise 6 (4.1)
 
-  def map[B] (f: A=>B): Option[B] = ???
+  def map[B] (f: A=>B): Option[B] = this match {
+    case None => None
+    case Some(a) => Some(f(a))
+  }
 
   // You may Ignore the arrow in default's type below for the time being.
   // (it should work (almost) as if it was not there)
@@ -118,11 +121,20 @@ sealed trait Option[+A] {
   // So it is not evaluated in case of Some (the term is 'call-by-name' and we
   // should talk about this soon).
 
-  def getOrElse[B >: A] (default: => B): B = ???
+  def getOrElse[B >: A] (default: => B): B = this match {
+    case None => default
+    case Some(a) => a
+  }
 
-  def flatMap[B] (f: A=>Option[B]): Option[B] = ???
+  def flatMap[B] (f: A=>Option[B]): Option[B] = this match {
+    case None => None
+    case Some(a) => if (f(a) == None) None else f(a)
+  }
 
-  def filter (p: A => Boolean): Option[A] = ???
+  def filter (p: A => Boolean): Option[A] = this match {
+    case None => None
+    case Some(a) => if(p(a)) Some(a) else None
+  }
 
 }
 
@@ -139,7 +151,12 @@ object ExercisesOption {
 
   // Exercise 7 (4.2)
 
-  def variance (xs: Seq[Double]): Option[Double] = ???
+  def variance (xs: Seq[Double]): Option[Double] = {
+    for {
+      m <- mean(xs)
+      v <- mean(xs.map(x => math.pow(x-m, 2)))
+    } yield v
+  }
 
   // Exercise 8 (4.3)
 
