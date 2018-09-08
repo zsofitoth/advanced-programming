@@ -1,12 +1,16 @@
 // Advanced Programming, A. Wąsowski, IT University of Copenhagen
 //
-// Group number: _____
+// Group number: 30
 //
-// AUTHOR1: __________
-// TIME1: _____ <- how much time have you used on solving this exercise set
+// AUTHOR1: zsto@itu.dk
+// TIME1: 10 hours <- how much time have you used on solving this exercise set
 // (excluding reading the book, fetching pizza, and going out for a smoke)
 //
 // AUTHOR2: __________
+// TIME2: _____ <- how much time have you used on solving this exercise set
+// (excluding reading the book, fetching pizza, and going out for a smoke)
+//
+// AUTHOR3: __________
 // TIME2: _____ <- how much time have you used on solving this exercise set
 // (excluding reading the book, fetching pizza, and going out for a smoke)
 //
@@ -92,7 +96,7 @@ object Tree {
     //def f(l: Int, r: Int) = l + r
     //def g(l: Int, r: Int) = 1 + f(l, r)
     // 1 + _ + _ is the same as 1 + f(_, _) 
-    fold[A, Int](t)(1 + _ + _)(a => 1)
+    fold[A, Int](t)(1 + _ + _)(a => 1)  
   }
 
 
@@ -135,7 +139,6 @@ sealed trait Option[+A] {
     case None => None
     case Some(a) => if(p(a)) Some(a) else None
   }
-
 }
 
 case class Some[+A] (get: A) extends Option[A]
@@ -157,17 +160,60 @@ object ExercisesOption {
       v <- mean(xs.map(x => math.pow(x-m, 2)))
     } yield v
   }
+  //OR: 
+  //mean(xs).flatMap(m => mean(xs).map(x => math.pow(x-m, 2)))
 
   // Exercise 8 (4.3)
 
-  def map2[A,B,C] (ao: Option[A], bo: Option[B]) (f: (A,B) => C): Option[C] = ???
+  def map2[A,B,C] (ao: Option[A], bo: Option[B]) (f: (A,B) => C): Option[C] = {
+    for {
+      b <- bo
+      a <- ao
+    } yield f(a, b)
+    
+    /*
+      I don't know if this is correct or necessary, I solved it like this before I saw the correct solution in the book (yellow sidebar),
+      but within the for yield each line is applying a flatMap anyways if I understood correctly
+      
+      for {
+        b <- ao.flatMap(_ => bo)
+        c <- ao.map(a => f(a, b))
+      } yield c
+    
+    */
+  }
+  
+  //Solution with flatMap and map
+  /*
+    ao.flatMap(a => 
+      bo.map(b => f(a, b)))
+  */
+  
+  //Solution with pattern matching
+  /*(ao, bo) match {
+      case (_, None) => None
+      case (None, _) => None
+      case (Some(a), Some(b)) => Some(f(a, b)) 
+  }*/
 
   // Exercise 9 (4.4)
 
-  def sequence[A] (aos: List[Option[A]]): Option[List[A]] = ???
+  def sequence[A] (aos: List[Option[A]]): Option[List[A]] = 
+    aos.foldRight[Option[List[A]]](Some(Nil))((ho, to) => map2(ho,to)((ho,to) =>ho::to))
+    //aos.foldRight[Option[List[A]]](Some(Nil))((ho,to) => ho.flatMap(h => to.map(t => h::t)))
+
+  //no pattern matching is allowed, but could this work as a recursive solution?
+  def sequence2[A] (aos: List[Option[A]]): Option[List[A]] = aos match {
+    case Nil => Some(Nil)
+    case ho::to => 
+      if(ho == None) None
+      else ho.flatMap(h => sequence2(to).map(h::_))
+  }
 
   // Exercise 10 (4.5)
 
-  def traverse[A,B] (as: List[A]) (f :A => Option[B]): Option[List[B]] = ???
-
+  def traverse[A,B] (as: List[A]) (f: A => Option[B]): Option[List[B]] = 
+    as.foldRight[Option[List[B]]](Some(Nil))((h,to) => map2(f(h), to)((ho,to) => ho::to))
+    //Traverses through the list twice
+    //sequence(as.map(a => f(a)))
 }
