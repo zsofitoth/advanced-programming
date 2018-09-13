@@ -173,7 +173,7 @@ object List {
   def calculateLists(l: List[Int]) (lt: List[Int]): List[Int] = (l, lt) match {
     case (_, Nil) => l
     case (Nil, _) => Nil
-    case (Cons(h1, t1), Cons(h2, t2)) => Cons(h1 + h2, calculateLists(t1) (t2))
+    case (Cons(h1, t1), Cons(h2, t2)) => Cons(h1 + h2, calculateLists(t1)(t2))
   }
 
   def pascal (n: Int): List[Int] = {
@@ -194,7 +194,7 @@ object List {
 
 object ListMain extends App {
   //original list
-  val as = List(1,2,3,4)
+  val as = List(0,1,2,3,4)
   val asCopy = List(1,2,3,4)
 
   val asDouble = List(1.0, 1.1, 2.1)
@@ -202,6 +202,7 @@ object ListMain extends App {
 
   //copies made by transforming list as
   val tailResult = List.tail(as)
+  println(tailResult)
   val setHeadResult = List.setHead(as, 6)
   val dropResult = List.drop(as, 3)
 
@@ -258,6 +259,6 @@ object ListMain extends App {
   //println(flattenedMappedList)
 
   val pascalList = List.pascal(5)
-  println(pascalList)
+  //println(pascalList)
 
 }
