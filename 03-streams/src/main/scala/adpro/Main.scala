@@ -20,4 +20,9 @@ object Main extends App {
     println(naturals.drop(5).take(10).toList)
     println(naturals.take(1000000000).drop(41).take(10).toList)
     println(naturals.takeWhile(_ < 20).toList)
+    println(naturals.forAll(_ > 20))
+    println(naturals.takeWhile2(_ < 20).toList)
+    println(naturals.headOption2())
+    println(naturals.map(_ + 2).take(5).toList)
+    println(naturals.drop(42).filter (_%2 ==0).take (30).toList)
 }

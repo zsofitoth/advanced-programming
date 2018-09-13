@@ -70,18 +70,29 @@ sealed trait Stream[+A] {
 
 
   //Exercise 5
-  def forAll(p: A => Boolean): Boolean = ???
+  def forAll(p: A => Boolean): Boolean = 
+    foldRight(true)((a, b) => p(a) && b)
+  /*this match {
+    case Empty => true
+    case Cons(h, t) => if(p(h())) true else false
+  }*/
 
 
   //Exercise 6
-  def takeWhile2(p: A => Boolean): Stream[A] = ???
+  def takeWhile2(p: A => Boolean): Stream[A] = 
+    foldRight(Empty: Stream[A])((h,t) => if(p(h)) cons(h, t) else Empty )
 
   //Exercise 7
-  def headOption2 () :Option[A] = ??? 
+  def headOption2 () :Option[A] = 
+    foldRight(None: Option[A])((h,t) => Some(h))
 
   //Exercise 8 The types of these functions are omitted as they are a part of the exercises
-  def map = ???
-  def filter = ???
+  def map[B](f: A => B): Stream[B] = 
+    foldRight(Empty: Stream[B])((h,t) => cons(f(h), t))
+
+  def filter(p: A => Boolean): Stream[A] = 
+    foldRight(Empty: Stream[A])((h,t) => if(p(h)) cons(h,t) else t)
+
   def append = ??? 
   def flatMap = ???
 
