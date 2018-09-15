@@ -51,6 +51,16 @@ sealed trait Stream[+A] {
     case Cons(h, t) => h()::t().toList
   }
 
+  def toList2: List[A] = {
+    @annotation.tailrec
+    def loop(s: Stream[A], acc: List[A]): List[A] = s match {
+      case Empty => acc
+      case Cons(h, t) => loop(t(), h()::acc)
+    }
+
+    loop(this, Nil: List[A]).reverse
+  }
+
   //Exercise 3
   def take(n: Int): Stream[A] = this match {
     case Empty => Empty
@@ -94,21 +104,35 @@ sealed trait Stream[+A] {
     foldRight(Empty: Stream[A])((h,t) => if(p(h)) cons(h,t) else t)
 
   def append = ??? 
-  def flatMap = ???
+
+  def flatMap[B](f: A => Stream[B]): Stream[B] = 
+    foldRight(Empty: Stream[B])((h,t) => Stream.append(f(h))(t))
 
   //Exercise 09
+  def find (p :A => Boolean) :Option[A]= this.filter(p).headOption
   //Put your answer here:
 
   //Exercise 10
   //Put your answer here:
+  def fib: Stream[Int] = {
+    def loop(prev: Int, cur: Int): Stream[Int] = {
+      cons(prev, loop(cur, cur + prev))
+    }
+    loop(0,1)
+  }
 
   //Exercise 11
-  def unfold[A, S](z: S)(f: S => Option[(A, S)]): Stream[A] = ???
+  def unfold[A, S](z: S)(f: S => Option[(A, S)]): Stream[A] = 
+    f(z).map(x => cons(x._1, unfold(x._2)(f))).getOrElse(Empty)
+  /*f(z) match {
+    case Some((h,t)) => cons(h, unfold(t)(f))
+    case None => Empty
+  }*/
 
 
   //Exercise 12
-  def fib2  = ???
-  def from2 = ???
+  def fib2: Stream[Int] = unfold((0, 1))(x => Some((x._1), (x._2, x._1 + x._2) ))
+  def from2(n: Int): Stream[Int] = unfold(n)(n => Some(n, n + 1))
 
   //Exercise 13
   def map2= ???
@@ -140,8 +164,11 @@ object Stream {
     //         use a generic function API of Seq
 
 
+  //TODO: move this to the trait
+  def append[A](s1: Stream[A])(s2: Stream[A]): Stream[A] =  
+    s1.foldRight(s2)((h,t) => cons(h, t))
+  
   //Exercise 1
-
   //going towards positive infinity
   def from(n:Int): Stream[Int] = cons(n,from(n+1))
   //going negative infinity
