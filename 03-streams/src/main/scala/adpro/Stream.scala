@@ -70,6 +70,11 @@ sealed trait Stream[+A] {
     case Empty => Empty
     case Cons(h, t) => if(n > 0) t().drop(n-1) else this
   }
+
+  //naturals.take(1000000000).drop(41).take(10).toList
+  /*
+    Will not terminate with memory exception, because it is evaluated lazily.
+  */
   
   //Exercise 4
   def takeWhile(p: A => Boolean): Stream[A] = this match {
@@ -77,6 +82,11 @@ sealed trait Stream[+A] {
     case Cons(h, t) => if(p(h())) cons(h(), t().takeWhile(p)) else Empty
   }
 
+  //naturals.takeWhile.(_<1000000000).drop(100).take(50).toList
+  /*
+    It terminates fast, because lazy evaluation applies. It will not filter all 1000000000
+    numbers, because the rest of the "chain" only needs to work on 50 elements before evaluation. 
+  */
 
   //Exercise 5
   def forAll(p: A => Boolean): Boolean = 
@@ -86,6 +96,16 @@ sealed trait Stream[+A] {
     case Cons(h, t) => if(p(h())) true else false
   }*/
 
+  //This should succeed: naturals.forAll (_ < 0)
+  /*
+    It will succeed because it will return false on the first element and will not evaluate the rest
+  */
+  //This should crash: naturals.forAll (_ >=0) . Explain why.
+  /*
+    This will crash because it is true for all elements and will evaluate "infinitely"
+  */
+
+  //both exists and forAll are fine to use for finite streams, because ...
   //Exercise 6
   def takeWhile2(p: A => Boolean): Stream[A] = 
     foldRight(Empty: Stream[A])((h,t) => if(p(h)) cons(h, t) else Empty )
@@ -127,9 +147,21 @@ sealed trait Stream[+A] {
     case None => Empty
   }*/
 
+  //PRETTIFIED
+  def unfold2[A, S](z: S)(f: S => Option[(A, S)]): Stream[A] = 
+    f(z).map(x => cons(x._1, unfold(x._2)(f))).getOrElse(Empty)
+
   //Exercise 12
-  def fib2: Stream[Int] = unfold((0, 1))(x => Some((x._1), (x._2, x._1 + x._2) ))
-  def from2(n: Int): Stream[Int] = unfold(n)(n => Some(n, n + 1))
+  //def fib2: Stream[Int] = unfold((0, 1))(x => Some((x._1), (x._2, x._1 + x._2) ))
+  //PRETTIFIED
+  def fib2: Stream[Int] = unfold((0,1)){
+    case (prev, cur) => Some(prev, (cur, prev+cur))
+  }
+
+  //def from2(n: Int): Stream[Int] = unfold(n)(n => Some(n, n + 1))
+  def from2(n: Int): Stream[Int] = unfold(0){
+    case n => Some(n, n+1)
+  }
 
   //Exercise 13
   def map2[B](f: A => B): Stream[B] = unfold(this){
