@@ -44,7 +44,6 @@ sealed trait Stream[+A] {
       // of ||)
   }
 
-
   //Exercise 2
   def toList: List[A] = this match {
     case Empty => Nil
@@ -87,7 +86,6 @@ sealed trait Stream[+A] {
     case Cons(h, t) => if(p(h())) true else false
   }*/
 
-
   //Exercise 6
   def takeWhile2(p: A => Boolean): Stream[A] = 
     foldRight(Empty: Stream[A])((h,t) => if(p(h)) cons(h, t) else Empty )
@@ -129,17 +127,31 @@ sealed trait Stream[+A] {
     case None => Empty
   }*/
 
-
   //Exercise 12
   def fib2: Stream[Int] = unfold((0, 1))(x => Some((x._1), (x._2, x._1 + x._2) ))
   def from2(n: Int): Stream[Int] = unfold(n)(n => Some(n, n + 1))
 
   //Exercise 13
-  def map2= ???
-  def take2 = ???
-  def takeWhile2 = ???
-  def zipWith2 = ???
+  def map2[B](f: A => B): Stream[B] = unfold(this){
+    case Cons(h, t) => Some((f(h()), t()))
+    case Empty => None
+  }
 
+  def take2(n: Int): Stream[A] = unfold((this, n))(x => x._1 match {
+    case Empty => None
+    case Cons(h, t) => if (x._2 > 0) Some((h(), (t(), x._2 - 1))) else None
+  })
+
+  def takeWhileViaUnfold(p: A => Boolean) = unfold(this) {
+    case Empty => None
+    case Cons(h, t) => if (p(h())) Some((h(), t())) else None
+  }
+
+  def zipWith[B,C](s2: Stream[B])(f: (A, B) => C): Stream[C] = unfold((this, s2)) {
+    case (Empty, _) => None
+    case (_, Empty) => None
+    case (Cons(h1, t1), Cons(h2, t2)) => Some((f(h1(), h2()), (t1(), t2())))
+  }
 }
 
 
