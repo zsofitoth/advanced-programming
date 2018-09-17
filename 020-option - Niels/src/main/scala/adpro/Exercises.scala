@@ -2,12 +2,16 @@
 //
 // Group number: 28
 //
-// AUTHOR1: __________
+// AUTHOR1: Sadaf Zahid <saza@itu.dk>
 // TIME1: _____ <- how much time have you used on solving this exercise set
 // (excluding reading the book, fetching pizza, and going out for a smoke)
 //
-// AUTHOR2: Niels Viberg Sønderbæk
+// AUTHOR2: Niels Viberg Sønderbæk <nivs@itu.dk>
 // TIME2: 10 hours <- how much time have you used on solving this exercise set
+// (excluding reading the book, fetching pizza, and going out for a smoke)
+//
+// AUTHOR3: Zsófia Tóth <zsto@itu.dk>
+// TIME1: 10 hours <- how much time have you used on solving this exercise set
 // (excluding reading the book, fetching pizza, and going out for a smoke)
 //
 // You should work with the file by following the associated exercise sheet
