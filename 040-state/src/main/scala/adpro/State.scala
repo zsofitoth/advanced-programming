@@ -122,15 +122,25 @@ object RNG {
 
   // Exercise 7 (6.7)
 
-  def sequence[A](fs: List[Rand[A]]): Rand[List[A]] = ???
+  def sequence[A](fs: List[Rand[A]]): Rand[List[A]] =   
+    fs.foldRight(unit(Nil:List[A]))((h, t) => map2(h, t)((h,t) => (h::t)))
 
-  def _ints(count: Int): Rand[List[Int]] = ???
+  def _ints(count: Int): Rand[List[Int]] = 
+    sequence(List.fill(count)(int))
 
   // Exercise 8 (6.8)
 
-  def flatMap[A,B](f: Rand[A])(g: A => Rand[B]): Rand[B] = ???
+  def flatMap[A,B](f: Rand[A])(g: A => Rand[B]): Rand[B] = rng => {
+    val (a, rng2) = f(rng)
+    g(a)(rng2)
+  }
 
-  def nonNegativeLessThan(n: Int): Rand[Int] = ???
+  def nonNegativeLessThan(n: Int): Rand[Int] =   
+    flatMap(nonNegativeInt){
+      i =>
+        val mod = i % n
+        if (i + (n-1) - mod >= 0) unit(mod) else nonNegativeLessThan(n)
+    }
 
 }
 
@@ -140,11 +150,23 @@ case class State[S, +A](run: S => (A, S)) {
 
   // Exercise 9 (6.10)
 
-  def map[B](f: A => B): State[S, B] = ???
+  def map[B](f: A => B): State[S, B] = State {
+    (s: S) =>
+      val (a, s2) = run(s)
+      (f(a), s2)
+  }
 
-  def map2[B,C](sb: State[S, B])(f: (A, B) => C): State[S, C] = ???
+  def map2[B,C](sb: State[S, B])(f: (A, B) => C): State[S, C] =
+    for {
+      b <- sb
+      a <- this
+    } yield f(a,b)
 
-  def flatMap[B](f: A => State[S, B]): State[S, B] = ???
+  def flatMap[B](f: A => State[S, B]): State[S, B] = State {
+    (s: S) =>
+      val (a, s2) = run(s)
+      f(a).run(s2)
+  }
 
 }
 
