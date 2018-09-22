@@ -2,8 +2,8 @@
 //
 // Group number: _____
 //
-// AUTHOR1: __________
-// TIME1: _____ <- how much time have you used on solving this exercise set
+// AUTHOR1: Zsofia Toth <zsto@itu.dk>
+// TIME1: 10 hours <- how much time have you used on solving this exercise set
 // (excluding reading the book, fetching pizza, and going out for a smoke)
 //
 // AUTHOR2: __________
