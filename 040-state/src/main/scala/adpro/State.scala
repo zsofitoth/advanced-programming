@@ -50,16 +50,35 @@ object RNG {
 
   // Exercise 3 (CB 6.3)
 
-  def intDouble (rng: RNG) = ???
+  def intDouble(rng: RNG): ((Int, Double), RNG) = {
+    val (i,rng2) = nonNegativeInt(rng)
+    val (d, rng3) = nonNegativeInt(rng2)
+    ((i,d), rng2)
+  }
 
-  def doubleInt (rng: RNG) = ???
+  def doubleInt(rng: RNG): ((Double, Int), RNG) = {
+    val ((i,d), rng2) =   intDouble(rng)
+    ((d, i), rng2)
+  }
+
 
   def boolean (rng: RNG): (Boolean, RNG) =
     rng.nextInt match { case (i,rng2) => (i%2==0,rng2) }
 
   // Exercise 4 (CB 6.4)
 
-  def ints(count: Int) (rng: RNG) = ???
+  def ints(count: Int)(rng: RNG):(List[Int], RNG) = {
+    @annotation.tailrec
+    def loop(n: Int, rng: RNG, l: List[Int]): (List[Int], RNG) = {
+      if (n == 0) (l, rng)
+      else{
+        val (i, newRng) = rng.nextInt
+        loop(n-1, newRng, i::l)
+      }
+    }
+
+    loop(count, rng, Nil: List[Int])
+  }
 
   // There is something terribly repetitive about passing the RNG along
   // every time. What could we do to eliminate some of this duplication
