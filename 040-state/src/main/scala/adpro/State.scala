@@ -167,7 +167,6 @@ case class State[S, +A](run: S => (A, S)) {
       val (a, s2) = run(s)
       f(a).run(s2)
   }
-
 }
 
 object State {
@@ -178,7 +177,8 @@ object State {
 
   // Exercise 9 (6.10) continued
 
-  def sequence[S,A](sas: List[State[S, A]]): State[S, List[A]] = ???
+  def sequence[S,A](sas: List[State[S, A]]): State[S, List[A]] = 
+    sas.foldRight(unit[S, List[A]](Nil: List[A]))((h,t) => h.map2(t)((h,t) => (h::t)))
 
   // This is given in the book:
 
@@ -195,12 +195,15 @@ object State {
 
   // Exercise 10
 
-  def state2stream[S,A] (s :State[S,A]) (seed :S) :Stream[A] = ???
+  def state2stream[S,A] (s :State[S,A]) (seed :S) :Stream[A] =
+    s.run(seed) match { 
+      case (a, s1) => a#::state2stream(s)(s1) 
+    }
 
   // Exercise 11 (lazy is added so that the class does not crash at load time
   // before you provide an implementation).
 
-  lazy val random_integers = ???
+  lazy val random_integers = state2stream(random_int)(new RNG.SimpleRNG(42))
 
 }
 
