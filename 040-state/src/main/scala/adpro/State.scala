@@ -34,11 +34,15 @@ object RNG {
 
   // Exercise 1 (CB 6.1)
 
-  def nonNegativeInt (rng: RNG): (Int, RNG) = ???
+  def nonNegativeInt(rng: RNG): (Int, RNG) = {
+    val (i, r) = rng.nextInt
+    val naturalNumber = if(i < 0) -(i + 1) else i
+    (naturalNumber, r)
+  }
 
   // Exercise 2 (CB 6.2)
 
-  def double (rng: RNG): (Double, RNG) = ???
+  def double(rng: RNG): (Double, RNG) = ???
 
   // Exercise 3 (CB 6.3)
 
