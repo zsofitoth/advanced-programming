@@ -62,9 +62,15 @@ sealed trait Stream[+A] {
 
   //Exercise 3
   def take(n: Int): Stream[A] = this match {
-    case Empty => Empty
-    case Cons(h, t) => if (n > 0) cons(h(), t().take(n-1)) else Empty
+    case Cons(h, t) if (n > 0) => cons(h(), t().take(n-1))
+    case _ => Empty
   }
+
+  //  this match {
+  //     case Cons(h, _) if n == 1 => cons(h(), Empty)
+  //     case Cons(h, t) if n > 0 => cons(h(), t().take(n - 1))
+  //     case _ => Empty
+  //   }
 
   def drop(n: Int): Stream[A] = this match {
     case Empty => Empty
@@ -121,17 +127,17 @@ sealed trait Stream[+A] {
   def filter(p: A => Boolean): Stream[A] = 
     foldRight(Empty: Stream[A])((h,t) => if(p(h)) cons(h,t) else t)
 
-  def append = ??? 
+  def append[B >: A](that: => Stream[B]): Stream[B] = 
+    this.foldRight(that: Stream[B])((h,t) => cons(h,t))
 
   def flatMap[B](f: A => Stream[B]): Stream[B] = 
-    foldRight(Empty: Stream[B])((h,t) => Stream.append(f(h))(t))
+    foldRight(Empty: Stream[B])((h,t) => f(h).append(t))
 
   //Exercise 09
-  def find (p :A => Boolean) :Option[A]= this.filter(p).headOption
-  //Put your answer here:
+  def find (p :A => Boolean) :Option[A] = 
+    this.filter(p).headOption
 
   //Exercise 10
-  //Put your answer here:
   def fib: Stream[Int] = {
     def loop(prev: Int, cur: Int): Stream[Int] = {
       cons(prev, loop(cur, cur + prev))
@@ -166,26 +172,24 @@ sealed trait Stream[+A] {
   //Exercise 13
   def map2[B](f: A => B): Stream[B] = unfold(this){
     case Cons(h, t) => Some((f(h()), t()))
-    case Empty => None
+    case _ => None
   }
 
   def take2(n: Int): Stream[A] = unfold((this, n))(x => x._1 match {
-    case Empty => None
-    case Cons(h, t) => if (x._2 > 0) Some((h(), (t(), x._2 - 1))) else None
+    case Cons(h, t) if (x._2 > 0) => Some((h(), (t(), x._2 - 1)))
+    case _ => None
   })
 
   def takeWhileViaUnfold(p: A => Boolean) = unfold(this) {
-    case Empty => None
-    case Cons(h, t) => if (p(h())) Some((h(), t())) else None
+    case Cons(h, t) if (p(h())) => Some((h(), t()))
+    case _ => None
   }
 
   def zipWith[B,C](s2: Stream[B])(f: (A, B) => C): Stream[C] = unfold((this, s2)) {
-    case (Empty, _) => None
-    case (_, Empty) => None
     case (Cons(h1, t1), Cons(h2, t2)) => Some((f(h1(), h2()), (t1(), t2())))
+    case _ => None
   }
 }
-
 
 case object Empty extends Stream[Nothing]
 case class Cons[+A](h: ()=>A, t: ()=>Stream[A]) extends Stream[A]
