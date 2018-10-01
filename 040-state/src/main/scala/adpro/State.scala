@@ -1,13 +1,17 @@
 // Advanced Programming, A. Wąsowski, IT University of Copenhagen
 //
-// Group number: _____
+// Group number: 28
 //
-// AUTHOR1: Zsofia Toth <zsto@itu.dk>
+// AUTHOR1: Sadaf Zahid <saza@itu.dk>
 // TIME1: 10 hours <- how much time have you used on solving this exercise set
 // (excluding reading the book, fetching pizza, and going out for a smoke)
 //
-// AUTHOR2: __________
-// TIME2: _____ <- how much time have you used on solving this exercise set
+// AUTHOR2: Niels Viberg Sønderbæk <nivs@itu.dk>
+// TIME2: 10 hours <- how much time have you used on solving this exercise set
+// (excluding reading the book, fetching pizza, and going out for a smoke)
+//
+// AUTHOR3: Zsófia Tóth <zsto@itu.dk>
+// TIME1: 10 hours <- how much time have you used on solving this exercise set
 // (excluding reading the book, fetching pizza, and going out for a smoke)
 //
 // You should work with the file by following the associated exercise sheet
