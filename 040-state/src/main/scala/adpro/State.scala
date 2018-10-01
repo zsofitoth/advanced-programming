@@ -54,10 +54,18 @@ object RNG {
 
   // Exercise 3 (CB 6.3)
 
-  def intDouble(rng: RNG): ((Int, Double), RNG) = {
+  //did not work with the test in exercise 6
+  def intDouble2(rng: RNG): ((Int, Double), RNG) = {
     val (i,rng2) = nonNegativeInt(rng)
     val (d, rng3) = nonNegativeInt(rng2)
     ((i,d), rng2)
+  }
+
+  //to make exercise 6 test pass
+  def intDouble(rng: RNG): ((Int, Double), RNG) = {
+    val (i, r1) = nonNegativeInt(rng)
+    val (d, r2) = double(r1)
+    ((i, d), r2)
   }
 
   def doubleInt(rng: RNG): ((Double, Int), RNG) = {
@@ -162,9 +170,11 @@ case class State[S, +A](run: S => (A, S)) {
 
   def map2[B,C](sb: State[S, B])(f: (A, B) => C): State[S, C] =
     for {
-      b <- sb
       a <- this
+      b <- sb
     } yield f(a,b)
+
+    //OR: flatMap(a => sb.map(b => f(a, b)))
 
   def flatMap[B](f: A => State[S, B]): State[S, B] = State {
     (s: S) =>
