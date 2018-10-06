@@ -20,7 +20,7 @@ object Par {
 
   case class UnitFuture[A] (get: A) extends Future[A] {
     def isDone = true
-    def get (timeout: Long, units: TimeUnit) = get
+    def get (timeout: Long, units: TimeUnit) = get //obtain a value from a Future
     def isCancelled = false
     def cancel (evenIfRunning: Boolean) : Boolean = false
   }
@@ -43,16 +43,19 @@ object Par {
     The evaluation won't actually occur until forced by run.
   */
   //its arguement gets evaluated in a seperate logical thread
-  def fork[A] (a: => Par[A]) : Par[A] = es => es.submit(
-    new Callable[A] { def call = a(es).get }
-  )
+  def fork[A] (a: => Par[A]) : Par[A] = 
+    (es: ExecutorService) => {
+      es.submit(new Callable[A] { def call = a(es).get })    
+    }
   
   //wraps the expression 'a' for concurrent evaluation by run
   def lazyUnit[A] (a: => A) : Par[A] = fork(unit(a))
 
   // Exercise 1 (CB7.4)
 
-  // def asyncF[A,B] (f: A => B) : A => Par[B] =
+  // converts A => B to A => Par[B] 
+  def asyncF[A,B] (f: A => B) : (A => Par[B]) = 
+    (a: A) => lazyUnit(f(a))
 
   // map is shown in the book
 
@@ -61,7 +64,8 @@ object Par {
 
   // Exercise 2 (CB7.5)
 
-  // def sequence[A] (ps: List[Par[A]]): Par[List[A]] = ...
+  def sequence[A] (ps: List[Par[A]]): Par[List[A]] = 
+    ps.foldRight(unit(Nil: List[A]))((uh, ut) => map2(uh,ut)( (h, t) => h::t ))
 
   // Exercise 3 (CB7.6)
 
