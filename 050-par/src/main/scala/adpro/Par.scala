@@ -71,26 +71,53 @@ object Par {
 
   // this is shown in the book:
 
-  // def parMap[A,B](ps: List[A])(f: A => B): Par[List[B]] = fork {
-  //   val fbs: List[Par[B]] = ps.map(asyncF(f))
-  //   sequence(fbs)
-  // }
+  def parMap[A,B](ps: List[A])(f: A => B): Par[List[B]] = fork {
+     val fbs: List[Par[B]] = ps.map(asyncF(f))
+     sequence(fbs)
+  }
 
-  // def parFilter[A](as: List[A])(f: A => Boolean): Par[List[A]] = ...
+  def parFilter[A](as: List[A])(f: A => Boolean): Par[List[A]] = {
+    val filtered: List[Par[List[A]]] =
+      as.map(asyncF((a: A) => if(f(a)) List(a) else Nil: List[A]))
+      map(sequence(filtered))(_.flatten)
+  }
+
+  //Could you explain if foldRight can be used for parFilter? (compiler errors)
 
   // Exercise 4: implement map3 using map2
 
-  // def map3[A,B,C,D] (pa :Par[A], pb: Par[B], pc: Par[C]) (f: (A,B,C) => D) :Par[D]  = ...
+  def map3[A,B,C,D] (pa :Par[A], pb: Par[B], pc: Par[C]) (f: (A,B,C) => D) :Par[D]  ={
+    //partially apply function
+    def partialCurry(a: A, b: B)(c: C): D = f(a, b, c)
+    
+    def applyFully(f: C => D, c: C): D = f(c)
+    map2(map2(pa, pb)((a, b) => partialCurry(a, b)(_)), pc)((ab, c) => applyFully(ab, c))
+  }
 
   // shown in the book
 
-  // def equal[A](e: ExecutorService)(p: Par[A], p2: Par[A]): Boolean = p(e).get == p2(e).get
+  def equal[A](e: ExecutorService)(p: Par[A], p2: Par[A]): Boolean = p(e).get == p2(e).get
 
   // Exercise 5 (CB7.11)
+  //FROM THE BOOK
+  def choice1[A] (cond: Par[Boolean]) (t: Par[A], f: Par[A]) : Par[A] =
+    (es: ExecutorService) => {
+      if(run(es)(cond).get()) t(es)
+      else f(es)
+    }
 
-  // def choiceN[A] (n: Par[Int]) (choices: List[Par[A]]) :Par[A] =
+  def choiceN[A] (n: Par[Int]) (choices: List[Par[A]]) :Par[A] = 
+    (es: ExecutorService) => {
+      //runs n
+      val i = run(es)(n).get
 
-  // def choice[A] (cond: Par[Boolean]) (t: Par[A], f: Par[A]) : Par[A] =
+      //uses it to select a parallel computation from choiches 
+      run(es)(choices(i))
+    }
+
+  def choice[A] (cond: Par[Boolean]) (t: Par[A], f: Par[A]) : Par[A] =
+    //if the condition evaluates to true then n will be 0 and choice N will run t (the 0th index of the list), else it'll run the 1st index
+    choiceN(map(cond)(x => if(x) 0 else 1))(List(t, f))
 
   // Exercise 6 (CB7.13)
 
