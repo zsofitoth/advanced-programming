@@ -121,15 +121,25 @@ object Par {
 
   // Exercise 6 (CB7.13)
 
-  // def chooser[A,B] (pa: Par[A]) (choices: A => Par[B]): Par[B] =
+  def chooser[A,B] (pa: Par[A]) (choices: A => Par[B]): Par[B] = 
+    (es: ExecutorService) => {
+      val x = run(es)(pa).get
+      run(es)(choices(x))
+    }
 
-  // def choiceNviaChooser[A] (n: Par[Int]) (choices: List[Par[A]]) :Par[A] =
+  def choiceNviaChooser[A] (n: Par[Int]) (choices: List[Par[A]]) :Par[A] = 
+    chooser(n)(choices)
 
-  // def choiceViaChooser[A] (cond: Par[Boolean]) (t: Par[A], f: Par[A]) : Par[A] =
+  def choiceViaChooser[A] (cond: Par[Boolean]) (t: Par[A], f: Par[A]) : Par[A] =
+    chooser(map(cond)(x => if(x) 0 else 1))(List(t, f))
 
   // Exercise 7 (CB7.14)
 
-  // def join[A] (a : Par[Par[A]]) :Par[A] =
+  def join[A](a: Par[Par[A]]): Par[A] = 
+    (es: ExecutorService) => run(es)(run(es)(a).get())
+
+  def flatMapViaJoin[A,B](p: Par[A])(f: A => Par[B]): Par[B] = 
+    join(map(p)(f))
 
   class ParOps[A](p: Par[A]) {
 
