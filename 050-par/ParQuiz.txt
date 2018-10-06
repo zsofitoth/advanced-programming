@@ -1,0 +1,14 @@
+//Worth 1 point
+def parForall[A](as: List[A])(p: A=>Boolean): Par[Boolean] = {
+    foldRight(true)((a, b) => Par.unit(p(a) && b))
+}
+//OR
+this match {
+    case Empty => Par.unit(true)
+    case Cons(h, t) => if(p(h) Par.unit(true) else Par.unit(false)
+}
+
+CORRECT (2 points)
+
+val bs: Par[List[Boolean]] = parMap(as)(p)
+map[List[Boolean], Boolean](bs) (_ forall identity)
