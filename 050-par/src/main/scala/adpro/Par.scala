@@ -20,7 +20,7 @@ object Par {
 
   case class UnitFuture[A] (get: A) extends Future[A] {
     def isDone = true
-    def get (timeout: Long, units: TimeUnit) = get
+    def get (timeout: Long, units: TimeUnit) = get //obtain a value from a Future
     def isCancelled = false
     def cancel (evenIfRunning: Boolean) : Boolean = false
   }
@@ -43,16 +43,19 @@ object Par {
     The evaluation won't actually occur until forced by run.
   */
   //its arguement gets evaluated in a seperate logical thread
-  def fork[A] (a: => Par[A]) : Par[A] = es => es.submit(
-    new Callable[A] { def call = a(es).get }
-  )
+  def fork[A] (a: => Par[A]) : Par[A] = 
+    (es: ExecutorService) => {
+      es.submit(new Callable[A] { def call = a(es).get })    
+    }
   
   //wraps the expression 'a' for concurrent evaluation by run
   def lazyUnit[A] (a: => A) : Par[A] = fork(unit(a))
 
   // Exercise 1 (CB7.4)
 
-  // def asyncF[A,B] (f: A => B) : A => Par[B] =
+  // converts A => B to A => Par[B] 
+  def asyncF[A,B] (f: A => B) : (A => Par[B]) = 
+    (a: A) => lazyUnit(f(a))
 
   // map is shown in the book
 
@@ -61,44 +64,82 @@ object Par {
 
   // Exercise 2 (CB7.5)
 
-  // def sequence[A] (ps: List[Par[A]]): Par[List[A]] = ...
+  def sequence[A] (ps: List[Par[A]]): Par[List[A]] = 
+    ps.foldRight(unit(Nil: List[A]))((uh, ut) => map2(uh,ut)( (h, t) => h::t ))
 
   // Exercise 3 (CB7.6)
 
   // this is shown in the book:
 
-  // def parMap[A,B](ps: List[A])(f: A => B): Par[List[B]] = fork {
-  //   val fbs: List[Par[B]] = ps.map(asyncF(f))
-  //   sequence(fbs)
-  // }
+  def parMap[A,B](ps: List[A])(f: A => B): Par[List[B]] = fork {
+     val fbs: List[Par[B]] = ps.map(asyncF(f))
+     sequence(fbs)
+  }
 
-  // def parFilter[A](as: List[A])(f: A => Boolean): Par[List[A]] = ...
+  def parFilter[A](as: List[A])(f: A => Boolean): Par[List[A]] = {
+    val filtered: List[Par[List[A]]] =
+      as.map(asyncF((a: A) => if(f(a)) List(a) else Nil: List[A]))
+      map(sequence(filtered))(_.flatten)
+  }
+
+  //Could you explain if foldRight can be used for parFilter? (compiler errors)
 
   // Exercise 4: implement map3 using map2
 
-  // def map3[A,B,C,D] (pa :Par[A], pb: Par[B], pc: Par[C]) (f: (A,B,C) => D) :Par[D]  = ...
+  def map3[A,B,C,D] (pa :Par[A], pb: Par[B], pc: Par[C]) (f: (A,B,C) => D) :Par[D]  ={
+    //partially apply function
+    def partialCurry(a: A, b: B)(c: C): D = f(a, b, c)
+    
+    def applyFully(f: C => D, c: C): D = f(c)
+    map2(map2(pa, pb)((a, b) => partialCurry(a, b)(_)), pc)((ab, c) => applyFully(ab, c))
+  }
 
   // shown in the book
 
-  // def equal[A](e: ExecutorService)(p: Par[A], p2: Par[A]): Boolean = p(e).get == p2(e).get
+  def equal[A](e: ExecutorService)(p: Par[A], p2: Par[A]): Boolean = p(e).get == p2(e).get
 
   // Exercise 5 (CB7.11)
+  //FROM THE BOOK
+  def choice1[A] (cond: Par[Boolean]) (t: Par[A], f: Par[A]) : Par[A] =
+    (es: ExecutorService) => {
+      if(run(es)(cond).get()) t(es)
+      else f(es)
+    }
 
-  // def choiceN[A] (n: Par[Int]) (choices: List[Par[A]]) :Par[A] =
+  def choiceN[A] (n: Par[Int]) (choices: List[Par[A]]) :Par[A] = 
+    (es: ExecutorService) => {
+      //runs n
+      val i = run(es)(n).get
 
-  // def choice[A] (cond: Par[Boolean]) (t: Par[A], f: Par[A]) : Par[A] =
+      //uses it to select a parallel computation from choiches 
+      run(es)(choices(i))
+    }
+
+  def choice[A] (cond: Par[Boolean]) (t: Par[A], f: Par[A]) : Par[A] =
+    //if the condition evaluates to true then n will be 0 and choice N will run t (the 0th index of the list), else it'll run the 1st index
+    choiceN(map(cond)(x => if(x) 0 else 1))(List(t, f))
 
   // Exercise 6 (CB7.13)
 
-  // def chooser[A,B] (pa: Par[A]) (choices: A => Par[B]): Par[B] =
+  def chooser[A,B] (pa: Par[A]) (choices: A => Par[B]): Par[B] = 
+    (es: ExecutorService) => {
+      val x = run(es)(pa).get
+      run(es)(choices(x))
+    }
 
-  // def choiceNviaChooser[A] (n: Par[Int]) (choices: List[Par[A]]) :Par[A] =
+  def choiceNviaChooser[A] (n: Par[Int]) (choices: List[Par[A]]) :Par[A] = 
+    chooser(n)(choices)
 
-  // def choiceViaChooser[A] (cond: Par[Boolean]) (t: Par[A], f: Par[A]) : Par[A] =
+  def choiceViaChooser[A] (cond: Par[Boolean]) (t: Par[A], f: Par[A]) : Par[A] =
+    chooser(map(cond)(x => if(x) 0 else 1))(List(t, f))
 
   // Exercise 7 (CB7.14)
 
-  // def join[A] (a : Par[Par[A]]) :Par[A] =
+  def join[A](a: Par[Par[A]]): Par[A] = 
+    (es: ExecutorService) => run(es)(run(es)(a).get())
+
+  def flatMapViaJoin[A,B](p: Par[A])(f: A => Par[B]): Par[B] = 
+    join(map(p)(f))
 
   class ParOps[A](p: Par[A]) {
 
