@@ -26,6 +26,8 @@ Functional Programming in Scala taught at ITU, Fall of 2018
 
 ### 03 - Laziness
 #### Topics and Exercises
+- Strictness vs Laziness
+- Finite/Infinite Streams
 
 ### 04 - State Monad
 #### Topics and Exercises
