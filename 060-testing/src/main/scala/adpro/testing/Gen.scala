@@ -97,12 +97,17 @@ object Prop {
   // the type of results returned by property testing
 
   sealed trait Result { def isFalsified: Boolean }
-  case object Passed extends Result { def isFalsified = false }
-  case class Falsified(failure: FailedCase,
-    successes: SuccessCount) extends Result {
+  
+  case object Passed extends Result { 
+    def isFalsified = false 
+  }
+
+  case class Falsified(failure: FailedCase, successes: SuccessCount) extends Result {
       def isFalsified = true
   }
-  case object Proved extends Result { def isFalsified = false }
+  case object Proved extends Result { 
+    def isFalsified = false 
+  }
 
   def forAll[A](as: Gen[A])(f: A => Boolean): Prop = Prop {
     (n,rng) => as.toStream(rng).zip(Stream.from(0)).take(n).map {
@@ -124,9 +129,19 @@ case class Prop (run: (TestCases,RNG)=>Result) {
 
   // (Exercise 7)
 
-  def && (that: Prop): Prop = Prop { ??? }
+  def && (that: Prop): Prop = Prop {  
+    (testCases: TestCases, rng:RNG) => run(testCases, rng) match {
+      case Passed => that.run(testCases, rng)
+      case x => x
+    }
+  }
 
-  def || (that: Prop): Prop = Prop { ??? }
+  def || (that: Prop): Prop = Prop { 
+    (testCases: TestCases, rng:RNG) => run(testCases, rng) match {
+      case Falsified(msg, _) => that.run(testCases,rng)
+      case x => x
+    }
+   }
 
 }
 
