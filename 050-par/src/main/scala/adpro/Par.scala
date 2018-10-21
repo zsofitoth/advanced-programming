@@ -4,6 +4,18 @@ import scala.language.implicitConversions
 
 // Work through the file top-down, following the exercises from the week's
 // sheet.  Uncomment and complete code fragments.
+// AUTHOR1: Sadaf Zahid <saza@itu.dk>
+// TIME1: 10 hours <- how much time have you used on solving this exercise set
+// (excluding reading the book, fetching pizza, and going out for a smoke)
+//
+// AUTHOR2: Niels Viberg Sønderbæk <nivs@itu.dk>
+// TIME2: 10 hours <- how much time have you used on solving this exercise set
+// (excluding reading the book, fetching pizza, and going out for a smoke)
+//
+// AUTHOR3: Zsófia Tóth <zsto@itu.dk>
+// TIME1: 10 hours <- how much time have you used on solving this exercise set
+// (excluding reading the book, fetching pizza, and going out for a smoke)
+//
 
 object Par {
 
