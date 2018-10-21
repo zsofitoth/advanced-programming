@@ -46,6 +46,8 @@ Functional Programming in Scala taught at ITU, Fall of 2018
 ### 06 - Property Testing
 #### Topics and Exercises
 - Functional library design (Part 2)
+- Gen trait, State
+- &&, ||, flatMap, union, map, choose, listOfN, map
 
 ### 07 - Parser Combinators
 #### Topics and Exercises
