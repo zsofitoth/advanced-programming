@@ -138,7 +138,10 @@ case class Prop (run: (TestCases,RNG)=>Result) {
 
   def || (that: Prop): Prop = Prop { 
     (testCases: TestCases, rng:RNG) => run(testCases, rng) match {
-      case Falsified(_, _) => that.run(testCases, rng) 
+      case Falsified(fails, successes) => that.run(testCases, rng) match {
+        case Falsified(fails1, succ1) => Falsified(fails1 + fails, succ1 + successes)
+        case _ => Falsified(fails, successes)
+      }
       case x => x
     }
    }
