@@ -39,6 +39,13 @@ class StreamSpecWasowski extends FlatSpec with Checkers {
     for { la <- arbitrary[List[A]] suchThat (_.nonEmpty)}
     yield list2stream (la)
 
+  def genNonEmptyPositiveStream (implicit arb: Arbitrary[Int]): Gen[Stream[Int]] =
+    for {
+      n <- Gen.choose (1,500)
+      g = Gen.listOfN[Int] (n, arb.arbitrary)
+      l <- g
+    } yield list2stream(l)
+
   //MOCK METHODS; to test with these not with the ones being tested 
 
   def mockMap[A, B](s: Stream[A])(f: A => B): Stream[B] = s match {
@@ -162,6 +169,19 @@ class StreamSpecWasowski extends FlatSpec with Checkers {
   it should "s1.append(s2).toList should be equal to (s1.toList).append((s2.toList))" in check {
      //we assume that the append in the List works as expected
     implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
+
     Prop.forAll{(s1 :Stream[Int], s2 :Stream[Int]) => ((s1.toList).++(s2.toList)) == (s1.append(s2)).toList }
-   }    
+  }
+
+  it should "the sum of s1.append(s2) = sum of s2.append(s1)" in check {
+    //we assume that the append in the List works as expected
+    implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
+    Prop.forAll{ (s1 :Stream[Int], s2 :Stream[Int]) => {
+        val l1 = s1.append(s2).toList 
+        val l2 = s2.append(s1).toList
+
+        l1.foldRight(0)(_+_) == l2.foldRight(0)(_+_)
+      }
+    }
+  }    
 }
