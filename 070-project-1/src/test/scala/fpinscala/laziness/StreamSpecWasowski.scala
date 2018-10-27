@@ -69,7 +69,7 @@ class StreamSpecWasowski extends FlatSpec with Checkers {
       Prop.forAll { (s: Stream[Int]) => Stream.cons(1, mockMap(s)(n => n/0)).headOption == Some(1) })
   }
 
-  behavior of "take"
+  behavior of "take(n)"
   
   it should "not force any heads nor any tails of the Stream it manipulates" in check {
     // stream will be a non-empty, finite stream
@@ -83,8 +83,22 @@ class StreamSpecWasowski extends FlatSpec with Checkers {
       Prop.forAll { (s: Stream[Int], z: Int) => mockMap(s)(n => n / 0).take(z).isInstanceOf[Stream[Int]] })
   }
 
-  // take(n) does not force (n+1)st head ever (even if we force all elements of take(n))
-  // s.take(n).take(n) == s.take(n) for any Stream s and any n (idempotency)
+  it should "not force (n+1)st head ever (even if we force all elements of take(n))" in check {
+    // stream will be a non-empty, finite stream
+    implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
+
+    ("random" |:
+      Prop.forAll { (s: Stream[Int], z: Int) => Stream.cons(z, Stream.cons(z, Stream.cons(z, Stream.cons(z, mockMap(s)(n => n / 0)))))
+        .take(4).toList.isInstanceOf[List[Int]] })
+  }
+
+  it should "s.take(n).take(n) == s.take(n) for any Stream s and any n (idempotency)" in check {
+    // stream will be a non-empty, finite stream
+    implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
+
+    ("random" |:
+      Prop.forAll { (s: Stream[Int], n: Int) => s.take(n).take(n).toList equals s.take(n).toList  })
+  }
 
   behavior of "drop"
   // s.drop(n).drop(m) == s.drop(n+m) for any n, m (additivity)
