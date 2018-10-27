@@ -39,6 +39,13 @@ class StreamSpecWasowski extends FlatSpec with Checkers {
     for { la <- arbitrary[List[A]] suchThat (_.nonEmpty)}
     yield list2stream (la)
 
+  //MOCK METHODS; to test with these not with the ones being tested 
+
+  def mockMap[A, B](s: Stream[A])(f: A => B): Stream[B] = s match {
+    case Cons(h, t) => Stream.cons(f(h()), mockMap(t())(f))
+    case _ => Stream.empty
+  }
+
   // a property test:
 
   it should "return the head of the stream packaged in Some (02)" in check {
@@ -53,11 +60,29 @@ class StreamSpecWasowski extends FlatSpec with Checkers {
   }
 
   it should "not force the tail of the stream" in check {
+    // stream will be a non-empty, finite stream
     implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
+    
+    // n/0 -> should throw arithmetic exception if it is evaluated ("forced")
+    
+    ("random" |:
+      Prop.forAll { (s: Stream[Int]) => Stream.cons(1, mockMap(s)(n => n/0)).headOption == Some(1) })
   }
 
   behavior of "take"
-  // take should not force any heads nor any tails of the Stream it manipulates
+  
+  it should "not force any heads nor any tails of the Stream it manipulates" in check {
+    // stream will be a non-empty, finite stream
+    implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
+    
+    // n/0 -> should throw arithmetic exception if it is evaluated ("forced")
+    // map all elements of the stream, take z elements (can be any number) and check if the result is an Stream[Int] type
+    // if take "forces" the evaluation an arithmetic exception will be thrown
+
+    ("random" |:
+      Prop.forAll { (s: Stream[Int], z: Int) => mockMap(s)(n => n / 0).take(z).isInstanceOf[Stream[Int]] })
+  }
+
   // take(n) does not force (n+1)st head ever (even if we force all elements of take(n))
   // s.take(n).take(n) == s.take(n) for any Stream s and any n (idempotency)
 
