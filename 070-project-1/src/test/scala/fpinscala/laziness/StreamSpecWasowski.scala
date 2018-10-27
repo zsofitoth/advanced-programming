@@ -147,8 +147,8 @@ class StreamSpecWasowski extends FlatSpec with Checkers {
 
     ("random" |:
       Prop.forAll { (s: Stream[Int], m: Int) => {
-        val ss = Stream(s.take(size/2), (mockMap(s.take(size - size/2))(x => x/0)))
-        ss.flatMap(s => s.drop(m)).isInstanceOf[Stream[Int]]
+        val ss = s.take(size/2).append(mockMap(s.take(size - size/2))(x => x / 0))
+        ss.drop(m).isInstanceOf[Stream[Int]]
       }  
     })
   }
