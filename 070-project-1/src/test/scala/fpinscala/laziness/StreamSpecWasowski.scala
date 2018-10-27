@@ -23,7 +23,7 @@ class StreamSpecWasowski extends FlatSpec with Checkers {
 
   import Stream._
 
-  behavior of "headOption"
+  behavior of "01 - headOption"
 
   // a scenario test:
 
@@ -69,7 +69,7 @@ class StreamSpecWasowski extends FlatSpec with Checkers {
       Prop.forAll { (s: Stream[Int]) => Stream.cons(1, mockMap(s)(n => n/0)).headOption == Some(1) })
   }
 
-  behavior of "take(n)"
+  behavior of "02 - take(n)"
   
   it should "not force any heads nor any tails of the Stream it manipulates" in check {
     // stream will be a non-empty, finite stream
@@ -100,7 +100,7 @@ class StreamSpecWasowski extends FlatSpec with Checkers {
       Prop.forAll { (s: Stream[Int], n: Int) => s.take(n).take(n).toList equals s.take(n).toList  })
   }
 
-  behavior of "drop(n)"
+  behavior of "03 - drop(n)"
 
   it should "s.drop(n).drop(m) == s.drop(n+m) for any n, m (additivity)" in check {
     // stream will be a non-empty, finite stream
@@ -125,7 +125,7 @@ class StreamSpecWasowski extends FlatSpec with Checkers {
 
   }*/
 
-  behavior of "map"
+  behavior of "04 - map"
   it should "evaluate to true: x.map(id) == x (where id is the identity function)" in check {
     // stream will be a non-empty, finite stream
     implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
@@ -139,6 +139,29 @@ class StreamSpecWasowski extends FlatSpec with Checkers {
       Prop.forAll { (n: Int) => Stream.from(n).map(x => x + 1).isInstanceOf[Stream[Int]]  })
   }
 
-  behavior of "append"
+  behavior of "05 - append"
+  it should "should not force the stream that is being concatenated" in check {
+    // stream will be a non-empty, finite stream
+    implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
+    ("random" |:
+      Prop.forAll { (s1: Stream[Int], s2: Stream[Int]) => s1.append(mockMap(s2)(n => n/0)).isInstanceOf[Stream[Int]]  })
+  }
 
+  it should "the size of s1.append(s2) should equal to s2.append(s1)" in check {
+    implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
+    
+    ("random" |:
+      Prop.forAll { (s1: Stream[Int], s2: Stream[Int]) => {
+          val l1 = s1.append(s2).toList
+          val l2 = s2.append(s1).toList 
+          l1.size == l2.size
+        } 
+      })
+  }
+
+  it should "s1.append(s2).toList should be equal to (s1.toList).append((s2.toList))" in check {
+     //we assume that the append in the List works as expected
+    implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
+    Prop.forAll{(s1 :Stream[Int], s2 :Stream[Int]) => ((s1.toList).++(s2.toList)) == (s1.append(s2)).toList }
+   }    
 }
