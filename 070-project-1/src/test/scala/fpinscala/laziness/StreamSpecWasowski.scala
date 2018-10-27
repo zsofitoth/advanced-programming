@@ -46,6 +46,18 @@ class StreamSpecWasowski extends FlatSpec with Checkers {
       l <- g
     } yield list2stream(l)
 
+  def genNonEmptyStreamN (n: Int)(implicit arb: Arbitrary[Int]): Gen[Stream[Int]] =
+    for {
+      l <- Gen.listOfN[Int] (n, arb.arbitrary)
+    } yield list2stream(l)
+
+  def genStreamSize[A](size: Gen[Int])(implicit arb: Arbitrary[Int]): Gen[Stream[Int]] =  
+    for {
+      n <- size
+      g = Gen.listOfN[Int](n, arb.arbitrary) 
+      l <- g
+    } yield list2stream(l)
+
   //MOCK METHODS; to test with these not with the ones being tested 
 
   def mockMap[A, B](s: Stream[A])(f: A => B): Stream[B] = s match {
@@ -128,9 +140,18 @@ class StreamSpecWasowski extends FlatSpec with Checkers {
       Prop.forAll { (s: Stream[Int], n: Int) => mockMap(s)(n => n/0).drop(n).isInstanceOf[Stream[Int]]  })
   }
 
-  /*it should "not force any of the dropped elements heads even if we force some stuff in the tail" in check {
+  it should "not force any of the dropped elements heads even if we force some stuff in the tail" in check {
+    val size: Int = 20
+    implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStreamN(size))
+    implicit def arbPositiveInt = Arbitrary[Int] (Gen.choose(1, 5000))
 
-  }*/
+    ("random" |:
+      Prop.forAll { (s: Stream[Int], m: Int) => {
+        val ss = Stream(s.take(size/2), (mockMap(s.take(size - size/2))(x => x/0)))
+        ss.flatMap(s => s.drop(m)).isInstanceOf[Stream[Int]]
+      }  
+    })
+  }
 
   behavior of "04 - map"
   it should "evaluate to true: x.map(id) == x (where id is the identity function)" in check {
