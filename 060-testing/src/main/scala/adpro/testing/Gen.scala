@@ -27,11 +27,12 @@ case class Gen[A] (sample :State[RNG,A]) {
 
   // Exercise 3
 
-  def listOfN (n: Int): Gen[List[A]] = ???
+  def listOfN (n: Int): Gen[List[A]] = Gen(State.sequence(List.fill(n)(this.sample)))
 
   // Exercise 4
 
-  def flatMap[B] (f: A => Gen[B]): Gen[B] = ???
+  def flatMap[B] (f: A => Gen[B]): Gen[B] = 
+    Gen(this.sample.flatMap(a => f(a).sample))
 
   // It would be convenient to also have map  (uses flatMap)
 
@@ -39,11 +40,13 @@ case class Gen[A] (sample :State[RNG,A]) {
 
   // Exercise 5
 
-  def listOfN (size: Gen[Int]): Gen[List[A]] = ???
+  def listOfN (size: Gen[Int]): Gen[List[A]] = 
+    size.flatMap(a => this.listOfN(a))
 
   // Exercise 6
 
-  def union (that: Gen[A]): Gen[A] = ???
+  def union (that: Gen[A]): Gen[A] = 
+    Gen.boolean.flatMap(a => if(a) this else that)
 
   // Exercise 7 continues in the companion object (below)
 }
@@ -63,15 +66,21 @@ object Gen {
 
   // Exercise 1
 
-  def choose (start: Int, stopExclusive: Int): Gen[Int] = ???
+  def choose (start: Int, stopExclusive: Int): Gen[Int] = {
+    Gen(State(rng => RNG.nonNegativeInt(rng) match {
+      case (n, rng2) => ( n % (stopExclusive-start) + start , rng2 )
+    }))
+  }
 
   // Exercise 2
 
-  def unit[A] (a: =>A): Gen[A] = ???
+  def unit[A] (a: =>A): Gen[A] = Gen(State.unit(a))
 
-  def boolean: Gen[Boolean] = ???
+  def boolean: Gen[Boolean] = Gen(State(rng => RNG.boolean(rng) match {
+    case (n, rng2) => (n, rng2)
+  }))
 
-  def double: Gen[Double] = ???
+  def double: Gen[Double] = Gen(State(RNG.double))
 
   // (Exercise 3 is found in the Gen class above)
 
@@ -88,12 +97,17 @@ object Prop {
   // the type of results returned by property testing
 
   sealed trait Result { def isFalsified: Boolean }
-  case object Passed extends Result { def isFalsified = false }
-  case class Falsified(failure: FailedCase,
-    successes: SuccessCount) extends Result {
+  
+  case object Passed extends Result { 
+    def isFalsified = false 
+  }
+
+  case class Falsified(failure: FailedCase, successes: SuccessCount) extends Result {
       def isFalsified = true
   }
-  case object Proved extends Result { def isFalsified = false }
+  case object Proved extends Result { 
+    def isFalsified = false 
+  }
 
   def forAll[A](as: Gen[A])(f: A => Boolean): Prop = Prop {
     (n,rng) => as.toStream(rng).zip(Stream.from(0)).take(n).map {
@@ -115,9 +129,22 @@ case class Prop (run: (TestCases,RNG)=>Result) {
 
   // (Exercise 7)
 
-  def && (that: Prop): Prop = Prop { ??? }
+  def && (that: Prop): Prop = Prop {  
+    (testCases: TestCases, rng:RNG) => run(testCases, rng) match {
+      case Passed => that.run(testCases, rng)
+      case x => x
+    }
+  }
 
-  def || (that: Prop): Prop = Prop { ??? }
+  def || (that: Prop): Prop = Prop { 
+    (testCases: TestCases, rng:RNG) => run(testCases, rng) match {
+      case Falsified(fails, successes) => that.run(testCases, rng) match {
+        case Falsified(fails1, succ1) => Falsified(fails1 + fails, succ1 + successes)
+        case _ => Falsified(fails, successes)
+      }
+      case x => x
+    }
+   }
 
 }
 

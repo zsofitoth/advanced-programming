@@ -26,15 +26,32 @@ Functional Programming in Scala taught at ITU, Fall of 2018
 
 ### 03 - Laziness
 #### Topics and Exercises
+- Strictness vs Laziness
+- Finite/Infinite Streams
 
 ### 04 - State Monad
 #### Topics and Exercises
+- Purely functional RNG
+- Making stateful APIs pure
+- State Action data type
+- State APU
 
 ### 05 - Parallel Computations
 #### Topics and Exercises
+- Functional library design (Part 1)
+- Side effect free Par library
+- Executor Service, Future Task
+- unit, lazyUnit, fork, asyncF, map2, parMap, parFilter, parForall, map3, chooser, flatMap, join
 
 ### 06 - Property Testing
 #### Topics and Exercises
+- Functional library design (Part 2)
+- Gen trait, State
+- &&, ||, flatMap, union, map, choose, listOfN, map
+
+### 07 - Parser Combinators
+#### Topics and Exercises
+- Functional library design (Part 3)
 
 ## Mini Projects
 
