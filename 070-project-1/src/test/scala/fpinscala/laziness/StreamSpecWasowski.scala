@@ -65,6 +65,11 @@ class StreamSpecWasowski extends FlatSpec with Checkers {
     case _ => Stream.empty
   }
 
+  def mockAppend[A](sa: Stream[A], sb: Stream[A]): Stream[A] = sa match {
+    case Cons(h, t) => cons[A](h(), mockAppend(t(), sb))
+    case Empty => sb 
+  }
+
   // a property test:
 
   it should "return the head of the stream packaged in Some" in check {
@@ -147,7 +152,7 @@ class StreamSpecWasowski extends FlatSpec with Checkers {
 
     ("random" |:
       Prop.forAll { (s: Stream[Int], m: Int) => {
-        val ss = s.take(size/2).append(mockMap(s.take(size - size/2))(x => x / 0))
+        val ss = mockAppend(s.take(size/2), mockMap(s.take(size - size/2))(x => x / 0))
         ss.drop(m).isInstanceOf[Stream[Int]]
       }  
     })
