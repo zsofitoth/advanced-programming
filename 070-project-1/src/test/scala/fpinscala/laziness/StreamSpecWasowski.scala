@@ -27,7 +27,7 @@ class StreamSpecWasowski extends FlatSpec with Checkers {
 
   // a scenario test:
 
-  it should "return None on an empty Stream (01)" in {
+  it should "return None on an empty Stream" in {
     assert(empty.headOption == None)
   }
 
@@ -48,7 +48,7 @@ class StreamSpecWasowski extends FlatSpec with Checkers {
 
   // a property test:
 
-  it should "return the head of the stream packaged in Some (02)" in check {
+  it should "return the head of the stream packaged in Some" in check {
     // the implict makes the generator available in the context
     implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
 
@@ -100,14 +100,44 @@ class StreamSpecWasowski extends FlatSpec with Checkers {
       Prop.forAll { (s: Stream[Int], n: Int) => s.take(n).take(n).toList equals s.take(n).toList  })
   }
 
-  behavior of "drop"
-  // s.drop(n).drop(m) == s.drop(n+m) for any n, m (additivity)
-  // s.drop(n) does not force any of the dropped elements heads
-  // the above should hold even if we force some stuff in the tail
+  behavior of "drop(n)"
+
+  it should "s.drop(n).drop(m) == s.drop(n+m) for any n, m (additivity)" in check {
+    // stream will be a non-empty, finite stream
+    implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
+    // generate positive integers: m is 5, but n is -3 then it will fail since additivity does not apply
+    // it will drop 5 on one side and onæy 2 on the other side 
+    implicit def arbPositiveInt = Arbitrary[Int] (Gen.choose(1, 5000))
+
+    ("random" |:
+      Prop.forAll { (s: Stream[Int], n: Int, m: Int) => s.drop(n).drop(m).toList equals s.drop(n + m).toList  })
+  }
+
+  it should "not force any of the dropped elements heads" in check {
+    // stream will be a non-empty, finite stream
+    implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
+
+    ("random" |:
+      Prop.forAll { (s: Stream[Int], n: Int) => mockMap(s)(n => n/0).drop(n).isInstanceOf[Stream[Int]]  })
+  }
+
+  /*it should "not force any of the dropped elements heads even if we force some stuff in the tail" in check {
+
+  }*/
 
   behavior of "map"
-  // x.map(id) == x (where id is the identity function)
-  // map terminates on infinite streams
+  it should "evaluate to true: x.map(id) == x (where id is the identity function)" in check {
+    // stream will be a non-empty, finite stream
+    implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
+    
+    ("random" |:
+      Prop.forAll { (s: Stream[Int]) => s.map(n => n).toList equals s.toList  })
+  }
+
+  it should "terminate on infinite streams" in check {
+    ("random" |:
+      Prop.forAll { (n: Int) => Stream.from(n).map(x => x + 1).isInstanceOf[Stream[Int]]  })
+  }
 
   behavior of "append"
 
