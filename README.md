@@ -56,6 +56,18 @@ Functional Programming in Scala taught at ITU, Fall of 2018
 ### 09 - Functional Design
 #### Topics and Exercises
 
+### 10 - Monadic Evaluators
+#### Topics and Exercises
+
+### 11 - Assymetric Data Lenses
+#### Topics and Exercises
+
+### 13 - Finger Trees
+#### Topics and Exercises
+
+### 14 - Probabilistic Programming
+### Topics and Exercises
+
 ## Mini Projects
 
 ### 07 - Property Testing
@@ -63,3 +75,6 @@ Functional Programming in Scala taught at ITU, Fall of 2018
 - Test Suite for Stream library (headOption, take(n), drop(n), map, append)
 - Combination of property tests and scenario tests
 - Gen, Arbitrary, forAll, &&
+
+### 12 - Sentiment Analysis
+#### Topics and Exercises
