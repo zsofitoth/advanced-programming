@@ -66,7 +66,7 @@ Functional Programming in Scala taught at ITU, Fall of 2018
 #### Topics and Exercises
 
 ### 14 - Probabilistic Programming
-### Topics and Exercises
+#### Topics and Exercises
 
 ## Mini Projects
 
