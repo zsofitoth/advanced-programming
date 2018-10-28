@@ -69,7 +69,7 @@ class StreamSpecWasowski extends FlatSpec with Checkers {
       for {
         sz <- genNegativeStreamSize(size)
         s  <- genPositiveStreamSize(size)
-      } yield mockAppend(mockMap(sz)(x => x / 0), mockMap(sz)(x => x / 2))
+      } yield mockAppend(mockMap(sz)(x => x / 0), mockMap(s)(x => x / 2))
 
   //MOCK METHODS; to test with these not with the ones being tested 
 
@@ -160,16 +160,14 @@ class StreamSpecWasowski extends FlatSpec with Checkers {
   }
   
   // I created a stream where the first half is negative and i try to divide that by 0 (that should not evaluate) and the second half is postive, where it's legal to force some "stuff" 
-  // I do not know how to force "some stuff" in the tail without having the head evaluate. Is that even possible?
-  // I thought the whole point of the cons structure was to go from head to tail, not even at foldright we go from right really...
-  // I don't understand this test case at all, made it pass, but it doesn't test what it's supposed to i guess
+  // I check if the summation of the second half of the list is positive
   it should "not force any of the dropped elements heads even if we force some stuff in the tail" in check {
     val n: Int = 10
     implicit def abrStreamAppend = Arbitrary[Stream[Int]] (genStreamAppend[Int](n))
 
     ("random" |:
       Prop.forAll { (s: Stream[Int]) => {
-        s.drop(n + n).isInstanceOf[Stream[Int]]
+        s.drop(n + 1).foldRight(0)(_+_) > 0
       }  
     })
   }
