@@ -59,6 +59,8 @@ trait Parsers[ParseError, Parser[+_]] { self =>
     val runChar = Prop.forAll { (c: Char) => run(char(c))(c.toString) == Right(c) }
     val runString = Prop.forAll { (s: String) => run(string(s))(s) == Right(s) }
 
+    val or = Prop.protect { run(string("abra") | string("cadabra"))("abra") == Right("abra") }
+
     val listOfN1 = Prop.protect (run(listOfN(3, "ab" | "cad"))("ababcad") == Right("ababcad"))
     val listOfN2 = Prop.protect (run(listOfN(3, "ab" | "cad"))("cadabab") == Right("cadabab"))
     val listOfN3 = Prop.protect (run(listOfN(3, "ab" | "cad"))("ababab") == Right("ababab"))
@@ -77,12 +79,19 @@ trait Parsers[ParseError, Parser[+_]] { self =>
 
 
   // Exercise 1
-
-  // def manyA ...
+  // I interpreted this as something very specific
+  // takes an input string and parses (will only check for char(a), nothing else) and produces Right(n) based on the string and parse error in case of some error
+  def manyA(input: String): Either[ParseError, Int]
+    //implementation could be => run(numA)(input)
 
   // Exercise 2
 
-  def map2[A,B,C] (p: Parser[A], p2: Parser[B]) (f: (A,B) => C): Parser[C] = ???
+  def map2[A,B,C] (p: Parser[A], p2: Parser[B]) (f: (A,B) => C): Parser[C] = 
+    for {
+      t <- product(p, p2)
+    } yield f(t._1, t._2)
+
+  //map(product(p, p2))((t) => f(t._1, t._2))
 
   def many1[A] (p: Parser[A]): Parser[List[A]] = ???
 

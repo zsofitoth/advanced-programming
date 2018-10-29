@@ -10,14 +10,15 @@ import org.scalacheck._
 import org.scalacheck.Prop._
 import Arbitrary.arbitrary
 
-// If you comment out all the import lines below, then you test the Scala
-// Standard Library implementation of Streams. Interestingly, the standard
-// library streams are stricter than those from the book, so some laziness tests
-// fail on them :)
-
 import stream00._    // uncomment to test the book solution
 // import stream01._ // uncomment to test the broken headOption implementation
 // import stream02._ // uncomment to test another version that breaks headOption
+
+// DEAR TA,
+// We saw the hint too late on the forum about Try https://www.scala-lang.org/api/current/scala/util/Try.html.
+// However, we did not think it would be necessary to use as at the lecture Wasowski solved the property tests similalry as we did here.
+// Could you give us feedback regards to where we could have used it or made our tests better? Are our solutions satisfactory regards to going to the exam?
+// Thank you in advance! ZSTO, NIVS and SAZA
 
 class StreamSpecWasowski extends FlatSpec with Checkers {
 
@@ -39,6 +40,13 @@ class StreamSpecWasowski extends FlatSpec with Checkers {
     for { la <- arbitrary[List[A]] suchThat (_.nonEmpty)}
     yield list2stream (la)
 
+  def genNonEmptyStreamSmallN (implicit arb: Arbitrary[Int]): Gen[Stream[Int]] =
+    for {
+      n <- Gen.choose (-20000,20000)
+      g = Gen.listOfN[Int] (n, Gen.choose (-20000,20000))
+      l <- g
+    } yield list2stream(l)
+  
   def genNonEmptyPositiveStream (implicit arb: Arbitrary[Int]): Gen[Stream[Int]] =
     for {
       n <- Gen.choose (1,500)
@@ -99,7 +107,7 @@ class StreamSpecWasowski extends FlatSpec with Checkers {
 
   it should "not force the tail of the stream" in check {
     // stream will be a non-empty, finite stream
-    implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
+    implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStreamSmallN)
     
     // n/0 -> should throw arithmetic exception if it is evaluated ("forced")
     
@@ -108,10 +116,14 @@ class StreamSpecWasowski extends FlatSpec with Checkers {
   }
 
   behavior of "02 - take(n)"
+
+  it should "be empty the operation empty.take(n)" in {
+    assert(empty.take(20) == empty)
+  } 
   
   it should "not force any heads nor any tails of the Stream it manipulates" in check {
     // stream will be a non-empty, finite stream
-    implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
+    implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStreamSmallN)
     
     // n/0 -> should throw arithmetic exception if it is evaluated ("forced")
     // map all elements of the stream, take z elements (can be any number) and check if the result is an Stream[Int] type
@@ -123,7 +135,7 @@ class StreamSpecWasowski extends FlatSpec with Checkers {
 
   it should "not force (n+1)st head ever (even if we force all elements of take(n))" in check {
     // stream will be a non-empty, finite stream
-    implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
+    implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStreamSmallN)
 
     ("random" |:
       Prop.forAll { (s: Stream[Int], z: Int) => Stream.cons(z, Stream.cons(z, Stream.cons(z, Stream.cons(z, mockMap(s)(n => n / 0)))))
@@ -132,7 +144,7 @@ class StreamSpecWasowski extends FlatSpec with Checkers {
 
   it should "s.take(n).take(n) == s.take(n) for any Stream s and any n (idempotency)" in check {
     // stream will be a non-empty, finite stream
-    implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
+    implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStreamSmallN)
 
     ("random" |:
       Prop.forAll { (s: Stream[Int], n: Int) => s.take(n).take(n).toList equals s.take(n).toList  })
@@ -140,9 +152,13 @@ class StreamSpecWasowski extends FlatSpec with Checkers {
 
   behavior of "03 - drop(n)"
 
+  it should "be empty the operation empty.drop(n)" in {
+    assert(empty.drop(20) == empty)
+  } 
+
   it should "s.drop(n).drop(m) == s.drop(n+m) for any n, m (additivity)" in check {
     // stream will be a non-empty, finite stream
-    implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
+    implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStreamSmallN)
     // generate positive integers: m is 5, but n is -3 then it will fail since additivity does not apply
     // it will drop 5 on one side and onæy 2 on the other side 
     implicit def arbPositiveInt = Arbitrary[Int] (Gen.choose(1, 5000))
@@ -153,7 +169,7 @@ class StreamSpecWasowski extends FlatSpec with Checkers {
 
   it should "not force any of the dropped elements heads" in check {
     // stream will be a non-empty, finite stream
-    implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
+    implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStreamSmallN)
 
     ("random" |:
       Prop.forAll { (s: Stream[Int], n: Int) => mockMap(s)(n => n/0).drop(n).isInstanceOf[Stream[Int]]  })
@@ -175,13 +191,15 @@ class StreamSpecWasowski extends FlatSpec with Checkers {
   behavior of "04 - map"
   it should "evaluate to true: x.map(id) == x (where id is the identity function)" in check {
     // stream will be a non-empty, finite stream
-    implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
+    implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStreamSmallN)
     
     ("random" |:
       Prop.forAll { (s: Stream[Int]) => s.map(n => n).toList equals s.toList  })
   }
 
   it should "terminate on infinite streams" in check {
+    implicit def arbPositiveInt = Arbitrary[Int] (Gen.choose(-20000, 25000))
+
     ("random" |:
       Prop.forAll { (n: Int) => Stream.from(n).map(x => x + 1).isInstanceOf[Stream[Int]]  })
   }
@@ -189,13 +207,13 @@ class StreamSpecWasowski extends FlatSpec with Checkers {
   behavior of "05 - append"
   it should "should not force the stream that is being concatenated" in check {
     // stream will be a non-empty, finite stream
-    implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
+    implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStreamSmallN)
     ("random" |:
       Prop.forAll { (s1: Stream[Int], s2: Stream[Int]) => s1.append(mockMap(s2)(n => n/0)).isInstanceOf[Stream[Int]]  })
   }
 
   it should "the size of s1.append(s2) should equal to s2.append(s1)" in check {
-    implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
+    implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStreamSmallN)
     
     ("random" |:
       Prop.forAll { (s1: Stream[Int], s2: Stream[Int]) => {
@@ -208,9 +226,9 @@ class StreamSpecWasowski extends FlatSpec with Checkers {
 
   it should "s1.append(s2).toList should be equal to (s1.toList).append((s2.toList))" in check {
      //we assume that the append in the List works as expected
-    implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
+    implicit def arbStringStream = Arbitrary[Stream[String]] (genNonEmptyStream[String])
 
-    Prop.forAll{(s1 :Stream[Int], s2 :Stream[Int]) => ((s1.toList).++(s2.toList)) == (s1.append(s2)).toList }
+    Prop.forAll{(s1 :Stream[String], s2 :Stream[String]) => ((s1.toList).++(s2.toList)) == (s1.append(s2)).toList }
   }
 
   it should "the sum of s1.append(s2) = sum of s2.append(s1)" in check {
@@ -223,5 +241,9 @@ class StreamSpecWasowski extends FlatSpec with Checkers {
         l1.foldRight(0)(_+_) == l2.foldRight(0)(_+_)
       }
     }
+  }
+
+  it should "be empty the operation empty.append(empty)" in {
+    assert(empty.append(empty) == empty)
   }    
 }
