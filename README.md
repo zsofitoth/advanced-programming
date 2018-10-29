@@ -52,6 +52,12 @@ Functional Programming in Scala taught at ITU, Fall of 2018
 ### 08 - Parser Combinators
 #### Topics and Exercises
 - Functional library design (Part 3)
+- Algebraic Design
+- Full Abstraction
+- Type Constructor
+- Higher Kind, Higher Kinded Polymorphism
+- Structure-Preserving Map (only changes values produced, with identity there is no change at all)
+- Internal DSL, fluid interface
 
 ### 09 - Functional Design
 #### Topics and Exercises
