@@ -216,4 +216,5 @@ object ExercisesOption {
     as.foldRight[Option[List[B]]](Some(Nil))((h,to) => map2(f(h), to)((ho,to) => ho::to))
     //Traverses through the list twice
     //sequence(as.map(a => f(a)))
+
 }
