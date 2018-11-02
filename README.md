@@ -61,6 +61,11 @@ Functional Programming in Scala taught at ITU, Fall of 2018
 
 ### 09 - Functional Design
 #### Topics and Exercises
+- Design Patterns in Functional Programming
+  - Monoids
+  - Foldables
+  - Functors
+  - Monads
 
 ### 10 - Monadic Evaluators
 #### Topics and Exercises
