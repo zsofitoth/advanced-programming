@@ -81,12 +81,7 @@ trait Parsers[ParseError, Parser[+_]] { self =>
   // Exercise 1
   // I interpreted this as something very specific
   // takes an input string and parses it (will only check for char(a), nothing else) and produces Right(n) based on the string and parse error in case of some error
-  def manyA(input: String): Either[ParseError, Int] 
-  //implementation could be => 
-  /* = {
-    val numA: Parser[Int] = char('a').many.map(_.size)
-    run(numA)(input)
-  } */
+  def manyA(input: String): Either[ParseError, Int]
 
 
   // Exercise 2
