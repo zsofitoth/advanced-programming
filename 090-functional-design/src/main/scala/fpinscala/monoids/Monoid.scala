@@ -74,8 +74,12 @@ object Monoid {
   // Implement a productMonoid that builds a monoid out of two monoids. Test it
   // with scala check for instance by composing an Option[Int] monoid with a
   // List[String] monoid and running through our monoid laws.
-
-  // def productMonoid[A,B] (ma: Monoid[A]) (mb: Monoid[B]) =
+  
+  // if A and B are monoids, then (A,B) is certainly a monoid, their product
+  def productMonoid[A,B] (ma: Monoid[A]) (mb: Monoid[B]): Monoid[(A, B)] = new Monoid[(A,B)] {
+    def op(x: (A, B), y: (A, B)) = (ma.op(x._1, y._1), mb.op(x._2, y._2))
+    val zero = (ma.zero, mb.zero)
+  }
 
 }
 
@@ -90,18 +94,22 @@ trait Foldable[F[_]] {
 
   // Exercise 9 (CB 10.15)
 
-  // def toList[A] (fa: F[A]) :List[A]
+  def toList[A] (fa: F[A]) :List[A] = 
+    foldRight(fa)(Nil: List[A])((h, t) => h::t)
 }
 
 // Exercise 8 (CB 10.12 We just do Foldable[List])
 
 object Foldable extends Foldable[List] {
 
-  def foldRight[A,B] (as: List[A]) (b: B) (f: (A,B) => B): B = ???
+  def foldRight[A,B] (as: List[A]) (b: B) (f: (A,B) => B): B = 
+    as.foldRight(b)(f)
 
-  def foldLeft[A,B] (as: List[A]) (b: B) (f: (B,A) => B): B = ???
+  def foldLeft[A,B] (as: List[A]) (b: B) (f: (B,A) => B): B = 
+    as.foldLeft(b)(f)
 
-  def foldMap[A,B] (as: List[A]) (f: A => B) (mb: Monoid[B]): B = ???
+  def foldMap[A,B] (as: List[A]) (f: A => B) (mb: Monoid[B]): B = 
+    as.foldLeft(mb.zero)((h,t) => mb.op(h, f(t)))
 }
 
 // vim:cc=80:tw=80

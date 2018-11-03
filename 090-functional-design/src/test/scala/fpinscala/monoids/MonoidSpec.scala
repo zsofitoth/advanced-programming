@@ -54,6 +54,8 @@ object MonoidSpec extends Properties("Monoids..") {
   property("stringMonoid and listMonoid[Char] are isomorphic") = 
     isomorphism(stringMonoid)((s: String) => s.toList)(listMonoid)((as: List[Char]) => as.mkString)
 
+  // Exercise 6
+
   property("booleanOr and booleanAnd are homomorphic via !") = 
     homomorphism(booleanOr)((a: Boolean) => !a)(booleanAnd)
   
@@ -63,11 +65,6 @@ object MonoidSpec extends Properties("Monoids..") {
   property("booleanAnd and booleanOr are isomorphic via !") = 
     isomorphism(booleanAnd)((a: Boolean) => !a)(booleanOr)((a: Boolean) => !a)
 
-  // Exercise 6
-
-  // property ("booleanOr and booleanAnd are isomorphic") =
-
   // Exercise 7 (the testing part)
-
-  // property ("productMonoid is a monoid") =
+  //property ("productMonoid is a monoid") = monoid(productMonoid(optionMonoid)(listMonoid))
 }
