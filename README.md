@@ -62,8 +62,16 @@ Functional Programming in Scala taught at ITU, Fall of 2018
 ### 09 - Functional Design
 #### Topics and Exercises
 - Design Patterns in Functional Programming
-  - Monoids
+  - Monoids 
+    - closed
+    - associativity
+    - identity
+    - endomonoid
+    - homomorphism
+    - isomorphism
+    - product of a Monoid 
   - Foldables
+    - foldMap
   - Functors
   - Monads
 
