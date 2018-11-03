@@ -44,15 +44,25 @@ trait Monad[F[_]] {
 
   // Exercise 13 (CB11.3)
 
-  // def sequence[A] (lfa: List[F[A]]): F[List[A]] =
+  def sequence[A] (lfa: List[F[A]]): F[List[A]] = 
+    lfa.foldRight(unit(Nil: List[A]))((fh, ft) => map2(fh, ft)(_::_))
 
   // traverse seems to simply sequence results of mapping.  I do not think that
   // it appeared in our part. You can uncomment it once you have sequence.
-  // def traverse[A,B] (la: List[A]) (f: A => F[B]): F[List[B]] = sequence(la.map (f))
+  def traverse[A,B] (la: List[A]) (f: A => F[B]): F[List[B]] = sequence(la.map (f))
 
   // Exercise 14 (CB11.4)
 
-  // def replicateM[A] (n: Int, ma: F[A]): F[List[A]] =
+  def replicateM[A] (n: Int, ma: F[A]): F[List[A]] = sequence(List.fill(n)(ma))
+  //if (n <= 0) unit(Nil: List[A]) else map2(ma, replicateM(n - 1, ma))(_ :: _)
+
+  // LIST: will generate a list of lists. will contain the lists of length n with elements from the input list 
+  
+  // OPTION: generates either Some or None based on whether the input is Some or None. 
+  // The Some case will contain a list of length n that repeats the element in the input Option.
+  
+  // GENERAL: it repeats ma monadic value n times. 
+  // Gathers the results in a single value, where the monad `F` determines how values are actually combined.
 
   def join[A] (mma: F[F[A]]): F[A] = flatMap (mma) (ma => ma)
 

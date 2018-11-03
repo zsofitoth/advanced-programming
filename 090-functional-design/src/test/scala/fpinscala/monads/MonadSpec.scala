@@ -41,6 +41,7 @@ object  MonadSpec extends Properties("Monad[F[_]] laws..") {
 
   // Now test more monads:
 
-  // property ...
+  property ("of listMonad") = monad[Int, List] (listMonad)
+  property ("of listMonad") = monad[String, List] (listMonad)
 
 }
