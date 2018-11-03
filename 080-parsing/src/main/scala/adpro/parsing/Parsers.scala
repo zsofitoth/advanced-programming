@@ -99,7 +99,9 @@ trait Parsers[ParseError, Parser[+_]] { self =>
 
   // Exercise 3
 
-  // def digitTimesA  ...
+  def digitTimesA: Parser[Int] = {
+    flatMap("[0-9]+".r)(d => listOfN(d.toInt, char('a'))).map(x => x.size)
+  } 
 
   // Exercise 4
 
@@ -117,7 +119,7 @@ trait Parsers[ParseError, Parser[+_]] { self =>
 
   // Exercise 5
 
-  def map_[A, B](p: Parser[A])(f: A => B): Parser[B] = ???
+  def map_[A, B](p: Parser[A])(f: A => B): Parser[B] = p.flatMap( a => succeed(f(a)))
 
 }
 
