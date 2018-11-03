@@ -25,7 +25,9 @@ object Functor {
 
   // Exercise 10
 
-  // val OptionFunctor =
+  val OptionFunctor = new Functor[Option] {
+    def map[A, B](os: Option[A])(f: A => B): Option[B] = os map (f)
+  }
 
 }
 
@@ -66,8 +68,15 @@ object Monad {
 
   // Exercise 12 (CB11.1)
 
-  // val optionMonad =
+  val optionMonad = new Monad[Option] {
+    def unit[A](a: => A): Option[A] = Some(a)
+    def flatMap[A,B](ma: Option[A])(f: A => Option[B]): Option[B] = 
+      ma flatMap f
+  }
 
-  // val listMonad =
+  val listMonad = new Monad[List] {
+    def unit[A](a: => A): List[A] = List(a)
+    def flatMap[A, B](ma: List[A]) (f: A => List[B]) = ma flatMap f
+  }
 
 }

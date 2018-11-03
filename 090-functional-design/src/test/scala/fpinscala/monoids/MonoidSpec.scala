@@ -34,8 +34,7 @@ object MonoidSpec extends Properties("Monoids..") {
   property("intMultiplication is monoid") = monoid(intMultiplication)
   property("booleanOr is monoid") = monoid(booleanOr)
   property("booleanAnd is monoid") = monoid(booleanAnd)
-
-  // property("optionMonioid is monoid") = monoid(optionMonoid)
+  property("optionMonioid is monoid") = monoid[Option[Int]](optionMonoid)
 
   // Exercise 5
 
@@ -66,5 +65,6 @@ object MonoidSpec extends Properties("Monoids..") {
     isomorphism(booleanAnd)((a: Boolean) => !a)(booleanOr)((a: Boolean) => !a)
 
   // Exercise 7 (the testing part)
-  //property ("productMonoid is a monoid") = monoid(productMonoid(optionMonoid)(listMonoid))
+  property ("productMonoid is a monoid") = 
+    monoid[(Option[Int], List[String])](productMonoid[Option[Int], List[String]](optionMonoid)(listMonoid))
 }
