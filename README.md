@@ -77,6 +77,8 @@ Functional Programming in Scala taught at ITU, Fall of 2018
 
 ### 10 - Monadic Evaluators
 #### Topics and Exercises
+- Interpreters
+- Abstract Haskell
 
 ### 11 - Assymetric Data Lenses
 #### Topics and Exercises
@@ -97,3 +99,6 @@ Functional Programming in Scala taught at ITU, Fall of 2018
 
 ### 12 - Sentiment Analysis
 #### Topics and Exercises
+- Apache Spark
+- Automatic Classification of Natural Language Texts
+- Perceptron Classifier
