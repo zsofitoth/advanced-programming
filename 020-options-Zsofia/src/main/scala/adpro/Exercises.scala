@@ -1,30 +1,3 @@
-// Advanced Programming, A. Wąsowski, IT University of Copenhagen
-//
-// Group number: 30
-//
-// AUTHOR1: zsto@itu.dk
-// TIME1: 10 hours <- how much time have you used on solving this exercise set
-// (excluding reading the book, fetching pizza, and going out for a smoke)
-//
-// AUTHOR2: __________
-// TIME2: _____ <- how much time have you used on solving this exercise set
-// (excluding reading the book, fetching pizza, and going out for a smoke)
-//
-// AUTHOR3: __________
-// TIME2: _____ <- how much time have you used on solving this exercise set
-// (excluding reading the book, fetching pizza, and going out for a smoke)
-//
-// You should work with the file by following the associated exercise sheet
-// (available in PDF from the course website).
-//
-// This file is compiled with 'sbt compile' and tested with 'sbt test'.
-//
-// The file shall always compile and run after you are done with each exercise
-// (if you do them in order).  Please compile and test frequently. Of course,
-// some tests will be failing until you finish. Only hand in a solution that
-// compiles and where tests pass for all parts that you finished.    The tests
-// will fail for unfnished parts.  Comment such out.
-
 package adpro
 
 // Exercise  1
@@ -74,14 +47,14 @@ object Tree {
   // Exercise 3 (3.26)
 
   def maximum (t: Tree[Int]): Int = t match {
-    case Leaf(a) => a
+    case Leaf(a) => println(a); a
     case Branch(left, right) => maximum(left) max maximum(right)  
   }
 
   // Exercise 4 (3.28)
 
   def map[A,B] (t: Tree[A]) (f: A => B): Tree[B] = t match {
-    case Leaf(a) => Leaf(f(a))
+    case Leaf(a) => println(f(a));Leaf(f(a))
     case Branch(l, r) => Branch(map(l)(f), map(r)(f))
   }
 
@@ -110,6 +83,7 @@ object Tree {
 
 }
 
+
 sealed trait Option[+A] {
 
   // Exercise 6 (4.1)
@@ -118,12 +92,6 @@ sealed trait Option[+A] {
     case None => None
     case Some(a) => Some(f(a))
   }
-
-  // You may Ignore the arrow in default's type below for the time being.
-  // (it should work (almost) as if it was not there)
-  // It prevents the argument "default" from being evaluated until it is needed.
-  // So it is not evaluated in case of Some (the term is 'call-by-name' and we
-  // should talk about this soon).
 
   def getOrElse[B >: A] (default: => B): B = this match {
     case None => default
@@ -216,4 +184,24 @@ object ExercisesOption {
     as.foldRight[Option[List[B]]](Some(Nil))((h,to) => map2(f(h), to)((ho,to) => ho::to))
     //Traverses through the list twice
     //sequence(as.map(a => f(a)))
+
+}
+
+//TO SEE IT ON THE CONSOLE: sbt run
+
+object Main extends App {
+    val t: Tree[Int] = Branch( Branch(Leaf(1), Leaf(2)), Branch(Leaf(-1), Leaf(2)) )
+    println(t)
+
+    Tree.maximum(t)
+    Tree.map(t)(a => a * 2)
+
+    val t2 = Tree.fold(t)((a: Int, b: Int) => a + b)(x => if (x > 0)  x else 0)
+    println("addition " + t2)
+
+    val o: Option[String] = Some("h");
+    println(o)
+
+    val res: String = o.getOrElse("error");
+    println(res)
 }

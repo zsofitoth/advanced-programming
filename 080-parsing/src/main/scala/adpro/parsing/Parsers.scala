@@ -26,7 +26,7 @@ trait Parsers[ParseError, Parser[+_]] { self =>
   def many[A](p: Parser[A]): Parser[List[A]]
   def succeed[A](a: A): Parser[A] = string("") map (_ => a)
   def slice[A](p: Parser[A]): Parser[String]
-  def product[A,B](p: Parser[A], p2: =>Parser[B]): Parser[(A,B)]
+  def product[A,B](p: Parser[A], p2: => Parser[B]): Parser[(A,B)]
   def flatMap[A,B](p: Parser[A])(f: A => Parser[B]): Parser[B]
 
   implicit def regex(r: Regex): Parser[String]
@@ -59,6 +59,8 @@ trait Parsers[ParseError, Parser[+_]] { self =>
     val runChar = Prop.forAll { (c: Char) => run(char(c))(c.toString) == Right(c) }
     val runString = Prop.forAll { (s: String) => run(string(s))(s) == Right(s) }
 
+    val or = Prop.protect { run(string("abra") | string("cadabra"))("abra") == Right("abra") }
+
     val listOfN1 = Prop.protect (run(listOfN(3, "ab" | "cad"))("ababcad") == Right("ababcad"))
     val listOfN2 = Prop.protect (run(listOfN(3, "ab" | "cad"))("cadabab") == Right("cadabab"))
     val listOfN3 = Prop.protect (run(listOfN(3, "ab" | "cad"))("ababab") == Right("ababab"))
@@ -77,28 +79,47 @@ trait Parsers[ParseError, Parser[+_]] { self =>
 
 
   // Exercise 1
+  // I interpreted this as something very specific
+  // takes an input string and parses it (will only check for char(a), nothing else) and produces Right(n) based on the string and parse error in case of some error
+  def manyA(input: String): Either[ParseError, Int]
 
-  // def manyA ...
 
   // Exercise 2
 
-  def map2[A,B,C] (p: Parser[A], p2: Parser[B]) (f: (A,B) => C): Parser[C] = ???
+  def map2[A,B,C] (p: Parser[A], p2: Parser[B]) (f: (A,B) => C): Parser[C] = 
+    for {
+      t <- product(p, p2)
+    } yield f(t._1, t._2)
 
-  def many1[A] (p: Parser[A]): Parser[List[A]] = ???
+  //map(product(p, p2))((t) => f(t._1, t._2))
+  //product(p, p2) map (f.tupled)
+
+  def many1[A] (p: Parser[A]): Parser[List[A]] = 
+    map2(p, many(p))((a, b) => a::b)
 
   // Exercise 3
 
-  // def digitTimesA  ...
+  def digitTimesA: Parser[Int] = {
+    flatMap("[0-9]+".r)(d => listOfN(d.toInt, char('a'))).map(x => x.size)
+  } 
 
   // Exercise 4
 
-  // def product_[A,B] ...
+  def product_[A,B](p: Parser[A], p2: => Parser[B]): Parser[(A,B)] = 
+    for {
+      a <- p
+      b <- p2
+    } yield (a, b)
 
-  // def map2_ ...
+  def map2_[A,B,C] (p: Parser[A], p2: Parser[B]) (f: (A,B) => C): Parser[C] = 
+    for {
+      a <- p
+      b <- p2
+    } yield f(a, b)
 
   // Exercise 5
 
-  // def map_ ...
+  def map_[A, B](p: Parser[A])(f: A => B): Parser[B] = p.flatMap( a => succeed(f(a)))
 
 }
 
@@ -120,5 +141,8 @@ object JSON {
     val spaces = char (' ').many.slice
 
     ??? /* Exercise 6 */
+    // I do not understand what this exercise wants. 
+    // I don't know how to implement the JSON parser, but it is unclear what we have to place here if we fail to implement it...
+
   }
 }
