@@ -141,5 +141,8 @@ object JSON {
     val spaces = char (' ').many.slice
 
     ??? /* Exercise 6 */
+    // I do not understand what this exercise wants. 
+    // I don't know how to implement the JSON parser, but it is unclear what we have to place here if we fail to implement it...
+
   }
 }
