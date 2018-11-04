@@ -79,12 +79,17 @@ Functional Programming in Scala taught at ITU, Fall of 2018
 #### Topics and Exercises
 - Interpreters
 - Abstract Haskell
+- Self-study based on reading a research paper
 
 ### 11 - Assymetric Data Lenses
 #### Topics and Exercises
+- How to update deeply nested rich structures in a pure and persistent setting
 
 ### 13 - Finger Trees
 #### Topics and Exercises
+- Finger Trees 
+- Persistent Immutable Data Structures 
+- Polymorphic Recursion.
 
 ### 14 - Probabilistic Programming
 #### Topics and Exercises
