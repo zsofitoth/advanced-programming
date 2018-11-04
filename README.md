@@ -1,9 +1,13 @@
 # Advanced Programming
 Functional Programming in Scala taught at ITU, Fall of 2018.
 
-**Sources**
+**Reading**
 - Paul Chiusano, Runar Bjarnason; _Functional Programming in Scala_ (Manning 2014) [Chiusano, Bjarnason 2014] 
 - Koen Claessen, John Hughes; _QuickCheck: a lightweight tool for random testing of Haskell programs_ [Claessen, Hughes 2000]
+
+**Exercises**
+- Mostly from [Chiusano, Bjarnason 2014]
+- Repo of the book; [fpinscala](https://github.com/fpinscala/fpinscala)
 
 ## Weekly Exercise Sets
 ### 01 - Intro
