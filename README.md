@@ -88,6 +88,9 @@ Functional Programming in Scala taught at ITU, Fall of 2018
 
 ### 14 - Probabilistic Programming
 #### Topics and Exercises
+- Figaro
+- No homework
+- Basic Inference Techniques in AI
 
 ## Mini Projects
 
