@@ -10,7 +10,7 @@ import org.scalacheck._
 import org.scalacheck.Prop._
 import Arbitrary.arbitrary
 
-import stream00._    // uncomment to test the book solution
+ import stream00._    // uncomment to test the book solution
 // import stream01._ // uncomment to test the broken headOption implementation
 // import stream02._ // uncomment to test another version that breaks headOption
 
