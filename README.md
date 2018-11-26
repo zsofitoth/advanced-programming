@@ -130,10 +130,10 @@ Functional Programming in Scala taught at ITU, Fall of 2018.
 - Perceptron Classifier
 
 #### Implementation
-1. Translate review text into a vector of numbers (word embeddings)
- - tokenize texts (Tokenizer in MLlib)
- - translate all the words in a review text and its summary to vectors from GLoVe
- - sum all vectors for given review and divide the result by the number of vectors summed (average vector)
- - ignore words that are not found in GLoVe
-2. Use word embeddings with known ratings to train a network (multilayer perceptron)
-3. Use the perceptron to predict ratings for another set of reviews (validation)
+- Translate review text into a vector of numbers (word embeddings)
+  - tokenize texts (Tokenizer in MLlib)
+  - translate all the words in a review text and its summary to vectors from GLoVe
+  - sum all vectors for given review and divide the result by the number of vectors summed (average vector)
+  - ignore words that are not found in GLoVe
+- Use word embeddings with known ratings to train a network (multilayer perceptron)
+- Use the perceptron to predict ratings for another set of reviews (validation)
