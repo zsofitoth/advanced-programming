@@ -2,11 +2,11 @@
 // To execute this example, run "sbt run" or "sbt test" in the root dir of the project
 // Spark needs not to be installed (sbt takes care of it)
 
-import org.apache.spark.ml.feature.Tokenizer
-import org.apache.spark.sql.Dataset
+import org.apache.spark.ml.feature._
+import org.apache.spark.sql.{Dataset,DataFrame}
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.types._
-
+import org.apache.spark.sql.functions._
 
 object Main {
 
@@ -57,12 +57,66 @@ object Main {
 
   def main(args: Array[String]) = {
 
-    val glove  = loadGlove ("path/to/glove/file") // FIXME
-    val reviews = loadReviews ("path/to/amazon/reviews/file") // FIXME
+    val glove  = loadGlove ("trainData/glove.6B.50d.txt")
+    val reviews = loadReviews ("trainData/reviews.json")
+
+	val tokenizer = new Tokenizer().setInputCol("text").setOutputCol("words")
+	val tokenized = tokenizer.transform(reviews)
+
+	val words = tokenized.select("id","overall","words").withColumn("word",explode(col("words")))
+
+	val foo = words.join(glove, "word")
+	
+	val baz = foo.select("id", "vec").as[(Int, Array[Double])].groupByKey(k => k._1).mapGroups((k, vec) => (k, vec.map(_._2).toList.transpose.map(_.sum))).withColumnRenamed("_1","id").withColumnRenamed("_2","vec")
+
+	// size of words
+
+	val size = baz.select("id","vec").as[(Int, Array[Double])].groupByKey(k => k._1).mapGroups((k, group) => {val grp = group.toList; (k, grp.map(_._2.map(_ => grp.size)))}).withColumnRenamed("_1","id").withColumnRenamed("_2","vec")
+	
+	size.show
+
+	// divide all elements of 
+
+	//val bar = baz.select("id","vec").as[(Int, Array[Double])].map((k, vec) => (k,
+	//vec.map(_._2).toList.transpose.map(_.sum)))
+
+
+
+
+
+
+
+
+
+
+
+	// val baz = foo.select("id","word","vec").map(x).
+	
+	//groupByKey(k => k._1)
+
+	//baz.show
+
+	//foo.where("id","357").show
+
+	//foo.select("word","vec").show
+
+	//foo.select("vec").withColumn("sum", col("vec").flatmap(x => ))
+
+
+	//words.select("word").withColumn("vector",  glove.filter(x => col(x["word"]) == col("word")))
+
+	//foo.show
 
     // replace the following with the project code
-    glove.show
-    reviews.show
+    //glove.show
+    //reviews.show
+
+	//1. Tokenize all words in the 'text' column for the review variable
+	//2. Map all the words using the vector dictionary from the glove variable
+	//3. Sum all the internal vector variable for the 'review' and divide it with 
+	//   the number of vectors for that review
+
+
 
 		spark.stop
   }
