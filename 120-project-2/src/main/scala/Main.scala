@@ -8,6 +8,7 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.functions._
 
+
 object Main {
 
 	type Embedding       = (String, List[Double])
@@ -67,49 +68,27 @@ object Main {
 
 	val foo = words.join(glove, "word")
 	
-	val baz = foo.select("id", "vec").as[(Int, Array[Double])].groupByKey(k => k._1).mapGroups((k, vec) => (k, vec.map(_._2).toList.transpose.map(_.sum))).withColumnRenamed("_1","id").withColumnRenamed("_2","vec")
-
-	// size of words
-
-	val size = baz.select("id","vec").as[(Int, Array[Double])].groupByKey(k => k._1).mapGroups((k, group) => {val grp = group.toList; (k, grp.map(_._2.map(_ => grp.size)))}).withColumnRenamed("_1","id").withColumnRenamed("_2","vec")
+	val size = foo.select("id", "vec","word")
+		.as[(Int, Array[Double], String)]
+		.groupByKey(_._1)
+		.mapGroups((k, iterator) => {val vector = iterator.map(_._2).toList; (k, vector, vector.size)})
+		//.mapGroups((k, iterator) => (k, iterator.map(._2).toList.transpose.map(.sum)))
+		.withColumnRenamed("_1","id")
+		.withColumnRenamed("_2","vec")
+		.withColumnRenamed("_3","size")
 	
 	size.show
 
-	// divide all elements of 
-
-	//val bar = baz.select("id","vec").as[(Int, Array[Double])].map((k, vec) => (k,
-	//vec.map(_._2).toList.transpose.map(_.sum)))
 
 
+	//val baz = foo.select("id", "vec").as[(Int, Array[Double])].groupByKey(k => k._1).mapGroups((k, group) => (k, group.map(_._2).toList.transpose.map(_.sum))).withColumnRenamed("_1","id").withColumnRenamed("_2","vec")
 
+	// size of words
 
-
-
-
-
-
-
-
-	// val baz = foo.select("id","word","vec").map(x).
+	//val size2 = baz.select("id","vec").groupByKey(k => k._1).mapGroups((k, group) => {val grp = group.toList; (k, grp.map(_._2.map(_ => grp.size)))}).withColumnRenamed("_1","id").withColumnRenamed("_2","vec")
 	
-	//groupByKey(k => k._1)
+	//size2.show
 
-	//baz.show
-
-	//foo.where("id","357").show
-
-	//foo.select("word","vec").show
-
-	//foo.select("vec").withColumn("sum", col("vec").flatmap(x => ))
-
-
-	//words.select("word").withColumn("vector",  glove.filter(x => col(x["word"]) == col("word")))
-
-	//foo.show
-
-    // replace the following with the project code
-    //glove.show
-    //reviews.show
 
 	//1. Tokenize all words in the 'text' column for the review variable
 	//2. Map all the words using the vector dictionary from the glove variable
