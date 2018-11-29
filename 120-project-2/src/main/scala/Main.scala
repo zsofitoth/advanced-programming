@@ -69,9 +69,9 @@ object Main {
 	val foo = words.join(glove, "word")
 	
 	val size = foo.select("id", "vec","word")
-		.as[(Int, Array[Double], String)]
+		.as[(Int, List[Double], String)]
 		.groupByKey(_._1)
-		.mapGroups((k, iterator) => {val vector = iterator.map(_._2).toList; (k, vector, vector.size)})
+		.mapGroups((k, iterator) => {val vector = iterator.map(_._2).toList; (k, vector.transpose.map(_.sum / vector.size), vector.size)})
 		//.mapGroups((k, iterator) => (k, iterator.map(._2).toList.transpose.map(.sum)))
 		.withColumnRenamed("_1","id")
 		.withColumnRenamed("_2","vec")
