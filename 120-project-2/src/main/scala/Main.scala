@@ -66,29 +66,21 @@ object Main {
 
 	val words = tokenized.select("id","overall","words").withColumn("word",explode(col("words")))
 
-	val foo = words.join(glove, "word")
+	val gloveWords = words.join(glove, "word")
 	
-	val size = foo.select("id", "vec","word")
-		.as[(Int, List[Double], String)]
+	val average = gloveWords.select("id", "vec")
+		.as[(Int, List[Double])]
 		.groupByKey(_._1)
-		.mapGroups((k, iterator) => {val vector = iterator.map(_._2).toList; (k, vector.transpose.map(_.sum / vector.size), vector.size)})
-		//.mapGroups((k, iterator) => (k, iterator.map(._2).toList.transpose.map(.sum)))
+		.mapGroups((k, iterator) => {
+			val vector = iterator.map(_._2).toList;
+			(k, vector.transpose.map(_.sum / vector.size))
+		})
 		.withColumnRenamed("_1","id")
 		.withColumnRenamed("_2","vec")
-		.withColumnRenamed("_3","size")
 	
-	size.show
+	val result = tokenized.select("id","overall").join(average, "id")
 
-
-
-	//val baz = foo.select("id", "vec").as[(Int, Array[Double])].groupByKey(k => k._1).mapGroups((k, group) => (k, group.map(_._2).toList.transpose.map(_.sum))).withColumnRenamed("_1","id").withColumnRenamed("_2","vec")
-
-	// size of words
-
-	//val size2 = baz.select("id","vec").groupByKey(k => k._1).mapGroups((k, group) => {val grp = group.toList; (k, grp.map(_._2.map(_ => grp.size)))}).withColumnRenamed("_1","id").withColumnRenamed("_2","vec")
-	
-	//size2.show
-
+	result.show
 
 	//1. Tokenize all words in the 'text' column for the review variable
 	//2. Map all the words using the vector dictionary from the glove variable
