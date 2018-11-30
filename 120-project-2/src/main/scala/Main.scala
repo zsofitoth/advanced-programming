@@ -9,6 +9,7 @@ import org.apache.spark.sql.types._
 import org.apache.spark.sql.functions._
 import org.apache.spark.ml.classification.MultilayerPerceptronClassifier
 import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
+import org.apache.spark.ml.linalg.{DenseVector, Vectors}
 
 
 object Main {
@@ -58,6 +59,15 @@ object Main {
 			.withColumnRenamed ("_2", "vec")
 			.as[Embedding]
 
+  def mapOverallToLabel(d: Double): Double = {
+	  d match {
+		  case 1.0 => 0.0
+		  case 2.0 => 0.0
+		  case 3.0 => 1.0
+		  case _ => 2.0
+	  }
+  }  
+
   def main(args: Array[String]) = {
 
     val glove  = loadGlove ("trainData/glove/glove.6B.50d.txt")
@@ -80,21 +90,29 @@ object Main {
 		.groupByKey(_._1)
 		.mapGroups((k, iterator) => {
 			val vector = iterator.map(_._2).toList;
-			(k, vector.transpose.map(_.sum / vector.size))
+			(k, Vectors.dense(vector.transpose.map(_.sum / vector.size).toArray))
 		})
 		.withColumnRenamed("_1","id")
 		.withColumnRenamed("_2","vec")
 	
 	val data = tokenized.select("id","overall")
-			.join(average, "id")
-			.withColumnRenamed ("vec", "features" )
-			.withColumnRenamed ("overall", "label" )
+			.as[(Int, Double)]
+			.groupByKey(_._1)
+			.mapGroups((k, iterator) => {
+				val label = iterator.map(a => mapOverallToLabel(a._2));
+				(k, label)
+			})
+			.withColumnRenamed("_1","id")
+			.withColumnRenamed("_2","overall")
+			//.join(average, "id")
+			//.withColumnRenamed ("vec", "features" )
+			//.withColumnRenamed ("overall", "label" )
 
 	data.show
 
 	// Use the embeddings with known ratings to train a network (a multilayer perceptron classifier)
 	// Split the data into train and test
-	val splits = data.randomSplit(Array(0.9, 0.1), seed = 1234L)
+	/*val splits = data.randomSplit(Array(0.9, 0.1), seed = 1234L)
 	val train = splits(0)
 	val test = splits(1)
 
@@ -123,7 +141,7 @@ object Main {
 	val evaluator = new MulticlassClassificationEvaluator()
 		.setMetricName("accuracy")
 
-	println(s"Test set accuracy = ${evaluator.evaluate(predictionAndLabels)}")
+	println(s"Test set accuracy = ${evaluator.evaluate(predictionAndLabels)}")*/
 
 
 	spark.stop
