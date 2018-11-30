@@ -40,7 +40,7 @@ object Main {
 			.json (path)
 			.rdd
 			.zipWithUniqueId
-			.map[(Integer,String,Double)] { case (row,id) => (id.toInt, s"${row getString 2} ${row getString 0}", row getDouble 1) }
+			.map[(Integer,String,Double)] { case (row,id) => (id.toInt, s"${row getString 2} ${row getString 0}", mapOverallToLabel(row getDouble 1)) }
 			.toDS
 			.withColumnRenamed ("_1", "id" )
 			.withColumnRenamed ("_2", "text")
@@ -96,17 +96,9 @@ object Main {
 		.withColumnRenamed("_2","vec")
 	
 	val data = tokenized.select("id","overall")
-			.as[(Int, Double)]
-			.groupByKey(_._1)
-			.mapGroups((k, iterator) => {
-				val label = iterator.map(a => mapOverallToLabel(a._2));
-				(k, label)
-			})
-			.withColumnRenamed("_1","id")
-			.withColumnRenamed("_2","overall")
-			//.join(average, "id")
-			//.withColumnRenamed ("vec", "features" )
-			//.withColumnRenamed ("overall", "label" )
+			.join(average, "id")
+			.withColumnRenamed ("vec", "features" )
+			.withColumnRenamed ("overall", "label" )
 
 	data.show
 
