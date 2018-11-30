@@ -3,7 +3,7 @@
 // Spark needs not to be installed (sbt takes care of it)
 
 import org.apache.spark.ml.feature._
-import org.apache.spark.sql.{Dataset,DataFrame}
+import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.functions._
@@ -100,7 +100,7 @@ object Main {
 			.withColumnRenamed ("vec", "features" )
 			.withColumnRenamed ("overall", "label" )
 
-	data.show
+	//data.show
 
 	// Use the embeddings with known ratings to train a network (a multilayer perceptron classifier)
 	// Split the data into train and test
@@ -147,9 +147,7 @@ object Main {
 	val predictionAndLabels = result.select("prediction", "label")
 
 	println("Test set accuracy = " + evaluator.evaluate(predictionAndLabels))
-
 	spark.stop
 
   }
-
 }
