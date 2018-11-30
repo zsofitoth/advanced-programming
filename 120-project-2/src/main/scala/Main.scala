@@ -2,10 +2,16 @@
 // To execute this example, run "sbt run" or "sbt test" in the root dir of the project
 // Spark needs not to be installed (sbt takes care of it)
 
-import org.apache.spark.ml.feature.Tokenizer
+import org.apache.spark.ml.feature._
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.types._
+import org.apache.spark.sql.functions._
+import org.apache.spark.ml.classification.MultilayerPerceptronClassifier
+import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
+import org.apache.spark.ml.linalg.{DenseVector, Vectors}
+import org.apache.spark.ml.Pipeline
+import org.apache.spark.ml.tuning.CrossValidator
 
 
 object Main {
@@ -36,7 +42,7 @@ object Main {
 			.json (path)
 			.rdd
 			.zipWithUniqueId
-			.map[(Integer,String,Double)] { case (row,id) => (id.toInt, s"${row getString 2} ${row getString 0}", row getDouble 1) }
+			.map[(Integer,String,Double)] { case (row,id) => (id.toInt, s"${row getString 2} ${row getString 0}", mapOverallToLabel(row getDouble 1)) }
 			.toDS
 			.withColumnRenamed ("_1", "id" )
 			.withColumnRenamed ("_2", "text")
@@ -55,16 +61,93 @@ object Main {
 			.withColumnRenamed ("_2", "vec")
 			.as[Embedding]
 
+  def mapOverallToLabel(d: Double): Double = {
+	  d match {
+		  case 1.0 => 0.0
+		  case 2.0 => 0.0
+		  case 3.0 => 1.0
+		  case _ => 2.0
+	  }
+  }  
+
   def main(args: Array[String]) = {
 
-    val glove  = loadGlove ("path/to/glove/file") // FIXME
-    val reviews = loadReviews ("path/to/amazon/reviews/file") // FIXME
+    val glove  = loadGlove ("trainData/glove/glove.6B.50d.txt")
+    val reviews = loadReviews ("trainData/reviews/reviews.json")
 
-    // replace the following with the project code
-    glove.show
-    reviews.show
+	//1. Tokenize all words in the 'text' column for the review variable
+	//2. Map all the words using the vector dictionary from the glove variable
+	//3. Sum all the internal vector variable for the 'review' and divide it with the number of vectors for that review
 
-		spark.stop
+	val tokenizer = new Tokenizer().setInputCol("text").setOutputCol("words")
+	val tokenized = tokenizer.transform(reviews)
+	val words = tokenized.select("id","overall","words").withColumn("word",explode(col("words")))
+	val gloveWords = words.join(glove, "word")
+	
+	val average = gloveWords.select("id", "vec")
+		.as[(Int, List[Double])]
+		.groupByKey(_._1)
+		.mapGroups((k, iterator) => {
+			val vector = iterator.map(_._2).toList;
+			(k, Vectors.dense(vector.transpose.map(_.sum / vector.size).toArray))
+		})
+		.withColumnRenamed("_1","id")
+		.withColumnRenamed("_2","vec")
+	
+	val data = tokenized.select("id","overall")
+			.as[(Int, Double)]
+			.join(average, "id")
+			.withColumnRenamed ("vec", "features" )
+			.withColumnRenamed ("overall", "label" )
+
+	//data.show
+
+	// Use the embeddings with known ratings to train a network (a multilayer perceptron classifier)
+	// Split the data into train and test
+	val splits = data.randomSplit(Array(0.9, 0.1), seed = 1234L)
+	val train = splits(0)
+	val test = splits(1)
+
+	val features: Int = data
+			.first()
+			.get(2)
+			.asInstanceOf[DenseVector].size
+
+	// features : average word embeddings (size of the vector?)
+	// specify layers for the neural network:
+	// input layer of size 4 (features), two intermediate of size 5 and 4 and output of size 3 (classes)
+	val layers = Array[Int](features, 5, 4, 3)
+
+	// create the trainer and set its parameters
+	val trainer = new MultilayerPerceptronClassifier()
+		.setLayers(layers)
+		.setBlockSize(128)
+		.setSeed(1234L)
+		.setMaxIter(10)
+
+	val pipeline: Pipeline = new Pipeline().setStages(Array(trainer))
+
+	val nFolds: Int = 10
+
+	val evaluator = new MulticlassClassificationEvaluator()
+		.setMetricName("accuracy")
+
+	val cv = new CrossValidator()
+			.setEstimator(pipeline)
+			.setEstimatorParamMaps(Array(trainer.extractParamMap()))
+			.setEvaluator(evaluator)
+			.setNumFolds(nFolds)
+
+	// train the model
+	val model = cv.fit(train)
+	
+	// Use the perceptron to predict ratings for another set of reviews (validation).
+	// compute accuracy on the test set
+	val result = model.transform(test)
+	val predictionAndLabels = result.select("prediction", "label")
+
+	println("Test set accuracy = " + evaluator.evaluate(predictionAndLabels))
+	spark.stop
+
   }
-
 }

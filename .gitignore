@@ -3,6 +3,7 @@
 *.bak
 *.class
 *.log
+.DS_Store
 
 # sbt specific
 .cache
@@ -22,3 +23,6 @@ project/plugins/project/
 # ENSIME specific
 .ensime_cache/
 .ensime
+
+#miniproject 2
+trainData/
