@@ -10,6 +10,8 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.ml.classification.MultilayerPerceptronClassifier
 import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
 import org.apache.spark.ml.linalg.{DenseVector, Vectors}
+import org.apache.spark.ml.Pipeline
+import org.apache.spark.ml.tuning.CrossValidator
 
 
 object Main {
@@ -75,14 +77,11 @@ object Main {
 
 	//1. Tokenize all words in the 'text' column for the review variable
 	//2. Map all the words using the vector dictionary from the glove variable
-	//3. Sum all the internal vector variable for the 'review' and divide it with 
-	//   the number of vectors for that review
+	//3. Sum all the internal vector variable for the 'review' and divide it with the number of vectors for that review
 
 	val tokenizer = new Tokenizer().setInputCol("text").setOutputCol("words")
 	val tokenized = tokenizer.transform(reviews)
-
 	val words = tokenized.select("id","overall","words").withColumn("word",explode(col("words")))
-
 	val gloveWords = words.join(glove, "word")
 	
 	val average = gloveWords.select("id", "vec")
@@ -96,6 +95,7 @@ object Main {
 		.withColumnRenamed("_2","vec")
 	
 	val data = tokenized.select("id","overall")
+			.as[(Int, Double)]
 			.join(average, "id")
 			.withColumnRenamed ("vec", "features" )
 			.withColumnRenamed ("overall", "label" )
@@ -104,39 +104,52 @@ object Main {
 
 	// Use the embeddings with known ratings to train a network (a multilayer perceptron classifier)
 	// Split the data into train and test
-	/*val splits = data.randomSplit(Array(0.9, 0.1), seed = 1234L)
+	val splits = data.randomSplit(Array(0.9, 0.1), seed = 1234L)
 	val train = splits(0)
 	val test = splits(1)
 
+	val features: Int = data
+			.first()
+			.get(2)
+			.asInstanceOf[DenseVector].size
+
 	// features : average word embeddings (size of the vector?)
 	// specify layers for the neural network:
-	// input layer of size 4 (features), two intermediate of size 5 and 4
-	// and output of size 3 (classes)
-
-	val layers = Array[Int](30, 5, 4, 3)
+	// input layer of size 4 (features), two intermediate of size 5 and 4 and output of size 3 (classes)
+	val layers = Array[Int](features, 5, 4, 3)
 
 	// create the trainer and set its parameters
 	val trainer = new MultilayerPerceptronClassifier()
 		.setLayers(layers)
 		.setBlockSize(128)
 		.setSeed(1234L)
-		.setMaxIter(100)
+		.setMaxIter(10)
+
+	val pipeline: Pipeline = new Pipeline().setStages(Array(trainer))
+
+	val nFolds: Int = 10
+
+	val evaluator = new MulticlassClassificationEvaluator()
+		.setMetricName("accuracy")
+
+	val cv = new CrossValidator()
+			.setEstimator(pipeline)
+			.setEstimatorParamMaps(Array(trainer.extractParamMap()))
+			.setEvaluator(evaluator)
+			.setNumFolds(nFolds)
 
 	// train the model
-	val model = trainer.fit(train)
-
+	val model = cv.fit(train)
 	
 	// Use the perceptron to predict ratings for another set of reviews (validation).
 	// compute accuracy on the test set
 	val result = model.transform(test)
 	val predictionAndLabels = result.select("prediction", "label")
-	val evaluator = new MulticlassClassificationEvaluator()
-		.setMetricName("accuracy")
 
-	println(s"Test set accuracy = ${evaluator.evaluate(predictionAndLabels)}")*/
-
+	println("Test set accuracy = " + evaluator.evaluate(predictionAndLabels))
 
 	spark.stop
+
   }
 
 }
