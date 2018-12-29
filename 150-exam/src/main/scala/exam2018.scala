@@ -37,8 +37,8 @@ object Q1 {
         if (l1 == tail) (head._1, head._2::Nil)::tail else l1
       })
 
-      println(result)
-      println(groupByKey2(l))
+      //println(result)
+      //println(groupByKey2(l))
     
   }
 
@@ -65,7 +65,20 @@ object Q1 {
 
 object Q2 { 
 
-  def f[A,B] (results: List[Either[A,B]]) :Either[List[A],List[B]] = ???
+  def printTest: Unit = {
+    val l: List[Either[String,Int]] = List(Left("FileNotFound"), Right(12), Left("IndexOutOfBound"), Right(44))
+    println(f(l))
+    
+  }
+  
+  //ZSÒFIA´s solution (I hope I understood the question correctly)
+  def f[A,B] (results: List[Either[A,B]]): Either[List[A],List[B]] = {
+    //val (lefts, rights) = results.partition(_.isLeft)
+    val lefts = results.filter(l => l.isLeft)
+    val rights = results.filter(r => r.isRight)
+    if(lefts.length != 0) Left(lefts.map(_.left.get))
+    else Right(rights.map(_.right.get))
+  }
 
 }
 
@@ -155,5 +168,6 @@ object Q9 {
 
 object Main extends App { 
   Q1.printTest
+  Q2.printTest
 }
 
