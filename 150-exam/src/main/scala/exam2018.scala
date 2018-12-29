@@ -29,15 +29,15 @@ object Q1 {
       //Zsofia's solution corrected with the teacher's solution
       val result =  
       l.foldRight(Nil: List[(Int, List[Int])]) ((head, tail) => {
-        val l1 = tail.map( el => {
+        val newTail = tail.map( el => {
           if(el._1 == head._1) (head._1, head._2::el._2)
           else el
         })
-        //this step is essential
-        if (l1 == tail) (head._1, head._2::Nil)::tail else l1
+        //this step is essential to put in the end, I was checking it at the beginning :/
+        if (newTail == tail) (head._1, head._2::Nil)::tail else newTail
       })
 
-      //println(result)
+      println(result)
       //println(groupByKey2(l))
     
   }
@@ -48,7 +48,7 @@ object Q1 {
   def groupByKey[K,V] (l: List[(K,V)]): List[(K,List[V])] = {
     l.foldRight(Nil: List[(K, List[V])]) ((head, tail) =>
         if(tail.length == 0) { 
-          List(head._1 -> (head._2::Nil))
+          List((head._1,head._2::Nil))
         }
         else {
           val newTail: List[(K, List[V])] = tail.map( el => {
@@ -68,7 +68,6 @@ object Q2 {
   def printTest: Unit = {
     val l: List[Either[String,Int]] = List(Left("FileNotFound"), Right(12), Left("IndexOutOfBound"), Right(44))
     println(f(l))
-    
   }
   
   //ZSÒFIA´s solution (I hope I understood the question correctly)
@@ -85,14 +84,36 @@ object Q2 {
 
 object Q3 {
 
+  //ZSÒFIA's solution
   type T[B] = Either[String,B]
-  implicit val eitherStringIsMonad :Monad[T] = ???
+  implicit val eitherStringIsMonad: Monad[T] = new Monad[T]{
+    override def unit[B](b: => B): T[B] = Right(b)
+    override def flatMap[B, C](mb: T[B])(f: B => T[C]): T[C] = mb flatMap f
+  }
 
 
 
   implicit def eitherIsMonad[A] = {
     type T[B] = Either[A,B]
-    ??? 
+    new Monad[T]{
+      override def unit[B](b: => B): T[B] = Right(b)
+      override def flatMap[B, C](mb: T[B])(f: B => T[C]) : T[C] = mb flatMap f
+    }
+  }
+
+  def printTest: Unit = {
+    val l: List[Either[String,Int]] = List(Left("FileNotFound"), Right(12), Left("IndexOutOfBound"), Right(44))
+    println(eitherStringIsMonad.unit(1))
+    println(
+      eitherStringIsMonad
+        .flatMap(Right(5))((a: Int) => Right(a + 4))
+    )
+
+    println(eitherIsMonad.unit(6))
+    println(
+      eitherIsMonad
+        .flatMap(Right(6))((a: Int) => Right(a + 4))
+    )
   }
 
 } // Q3
@@ -169,5 +190,6 @@ object Q9 {
 object Main extends App { 
   Q1.printTest
   Q2.printTest
+  Q3.printTest
 }
 
