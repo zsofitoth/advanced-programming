@@ -1,5 +1,5 @@
-// Name: _____________
-// ITU email: ________
+// Name: Zsófia Tóth
+// ITU email: zsto@itu.dk
 package adpro.exam2018
 
 import fpinscala.monoids.Monoid
@@ -14,9 +14,52 @@ import adpro.data.FingerTree._
 import monocle.Lens
 
 object Q1 { 
+  
+  //solution from teachers
+  private def f[K,V] (tail: List[(K,List[V])], head: (K,V)): List[(K,List[V])] = {
+    val l1 = tail map { el => if (el._1 == head._1) el._1->(head._2::el._2) else el }
+    if (l1 == tail) (head._1->List(head._2))::tail else l1
+  }
 
-  def groupByKey[K,V] (l :List[(K,V)]) :List[(K,List[V])] = ???
+  def groupByKey2[K,V] (l :List[(K,V)]) :List[(K,List[V])] =
+     l.foldRight[List[(K,List[V])]] (Nil) ((h, t) => f(t,h))
 
+  def printTest: Unit = {
+      val l: List[(Int, Int)] = List( (1,1), (1,1), (1,2), (2,3), (3, 4), (3, 5) )
+      //Zsofia's solution corrected with the teacher's solution
+      val result =  
+      l.foldRight(Nil: List[(Int, List[Int])]) ((head, tail) => {
+        val l1 = tail.map( el => {
+          if(el._1 == head._1) (head._1, head._2::el._2)
+          else el
+        })
+        //this step is essential
+        if (l1 == tail) (head._1, head._2::Nil)::tail else l1
+      })
+
+      println(result)
+      println(groupByKey2(l))
+    
+  }
+
+  // Zsofia's solution
+  // (K, V) -> key, value tuple
+  // groupByKey (List(1->1, 1->1, 1->2, 2->3)) should produce List(1->List(1,1,2), 2->List(3))
+  def groupByKey[K,V] (l: List[(K,V)]): List[(K,List[V])] = {
+    l.foldRight(Nil: List[(K, List[V])]) ((head, tail) =>
+        if(tail.length == 0) { 
+          List(head._1 -> (head._2::Nil))
+        }
+        else {
+          val newTail: List[(K, List[V])] = tail.map( el => {
+            if(el._1 == head._1) (head._1, head._2::el._2)
+            else (head._1, head._2::Nil)//::tail DOES NOT COMPILE
+          })
+
+          newTail
+        }
+      )
+  }
 }
 
 
@@ -109,4 +152,8 @@ object Q9 {
   // C. ...
 
 } // Q9
+
+object Main extends App { 
+  Q1.printTest
+}
 
