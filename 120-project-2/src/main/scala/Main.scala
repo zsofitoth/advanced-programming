@@ -71,9 +71,9 @@ object Main {
   }  
 
   def main(args: Array[String]) = {
-
-    val glove  = loadGlove ("trainData/glove/glove.6B.50d.txt")
-    val reviews = loadReviews ("trainData/reviews/reviews.json")
+	
+    val glove  = loadGlove ("trainData/glove/glove.6B.300d.txt")
+    val reviews = loadReviews ("trainData/reviews/digmusic.json")
 
 	//1. Tokenize all words in the 'text' column for the review variable
 	//2. Map all the words using the vector dictionary from the glove variable
@@ -123,7 +123,7 @@ object Main {
 		.setLayers(layers)
 		.setBlockSize(128)
 		.setSeed(1234L)
-		.setMaxIter(10)
+		.setMaxIter(50)
 
 	val pipeline: Pipeline = new Pipeline().setStages(Array(trainer))
 
