@@ -1,6 +1,11 @@
 **Zsófia Tóth.** *December, 2018*
 # AP Cheat Sheet
 ## Basics
+- useful list operations
+  - ```List.range(n, m)``` 
+    - where $n$ is start and $m$ is end
+  - ```List.fill(n)("foo")``` 
+    - where $n$ is the number of times it needs to be filled
 - referential transparency (RT)
 - higher order functions
 - recursion, tail recursion
@@ -193,7 +198,9 @@ case class Failure[A](t: Throwable) extends Try[A]
     - ```(A, RNG)```
       - $(value, rng)$
 - **RAND**
-    - ```RNG => (A, RNG)```
+    - ```type RAND[A] = RNG => (A, RNG)```
+    - ```RAND``` type alias for statw
+      - ```type RAND[A] = State[RNG, A]```   
     - ```unit```
         - ```def unit[A](a: A): Rand[A]```
         - produces: ```rng => (value, next)```
@@ -220,13 +227,19 @@ case class Failure[A](t: Throwable) extends Try[A]
         - ```val int: Rand[Int] = _.nextInt```
         - same as ```rng => rng.nextInt```
 - **STATE**
+  - make any API purely functional
+  - state updates are not RT
+    - return the new state along with the value generated
+  - this is a more general implementation of ```RAND```
+    - ```type Rand[A] = State[RNG, A]```
   - ```case class State[S, +A](run: S => (A, S))```
+  - ```type State[S, +A] = S => (A, S)```
+  - general-purpose functions for capturing states 
   - unfold and apply state
     ```Scala
     State {
         (s: S) => {
-            val (a, s2) = this.run(s)
-            (f(a), s2)
+            //must return State[S, B]
         }
     }
     ```
@@ -241,6 +254,8 @@ case class Failure[A](t: Throwable) extends Try[A]
       - construct a stream from the next value (a)
       - new "seed" to run is the "next" on the same state 
 ## Algebraic Design
+- the following 3 chapters have been introduced as part of AD
+- parser combinators is heavily focused on AD and contains exercises related to designing a library
 ### Par
 ### Property Testing
 #### Generators
