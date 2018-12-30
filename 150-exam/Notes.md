@@ -293,10 +293,20 @@ case class Failure[A](t: Throwable) extends Try[A]
     - $fork$ is controlling all parallelism
     - ```fork(map2(a, b)(f))```
         - if we want the evaluation of $f$ to occur in a seperate thread   
+- $map$
+    - via ```map2(pa, unit(()))((a,_) => f(a))```
 - $parMap$
     - combines $N$ parallel computations
     - apply a function $f$ to every element in a collection $simultaneously$
 - $parFilter$
+    - filters in parallel
+- $map3$ 
+  - via ```map2()```
+- $sequence$
+  - via ```map2()```
+- $chooser$
+- $join$
+- $flatMap$ 
 ### Property Testing
 #### Generators
 #### Laws

@@ -44,7 +44,7 @@ object Par {
   }
 
 
-  def sortPar(parList: Par[List[Int]]) = map(parList)(_.sorted)
+  def sortPar(parList: Par[List[Int]]): Par[List[Int]] = map(parList)(_.sorted)
 
   def sequence_simple[A](l: List[Par[A]]): Par[List[A]] =
     l.foldRight[Par[List[A]]](unit(List()))((h,t) => map2(h,t)(_ :: _))
