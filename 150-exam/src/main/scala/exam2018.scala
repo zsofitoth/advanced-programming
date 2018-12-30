@@ -162,7 +162,40 @@ object Q4 {
 
 object Q5 { 
 
-  def parForall[A] (as: List[A]) (p: A => Boolean): Par[Boolean] = ???
+  //TIPS:
+  // check if there is a parallel implementation of functions we can use
+  // e.g. parMap and parFilter
+  // viaParMap
+  def parForall[A] (as: List[A]) (p: A => Boolean): Par[Boolean] = {
+    val bas: Par[List[Boolean]] = parMap(as)(a => p(a))
+    //no foldRight in the Par API
+    /*bas.foldRight(true)((h,t) => h && t)*/
+    // the map will unwrap Par[List[Boolean]] to List[Boolean] and then it's possible to do foldRight
+    map[List[Boolean],Boolean](bas)(bas => bas.foldRight(true)((h, t) => h && t))
+  }
+
+  //via parFilter
+  def parForAll[A](as: List[A])(p: A => Boolean): Par[Boolean] = {
+    val bas: Par[List[A]] = parFilter(as)(a => p(a))
+    val isTrue: Par[Boolean] = map[List[A],Boolean](bas)(bas => bas.length == as.length)
+    isTrue
+  }
+
+  def printTest: Unit = {
+    val l: List[Int] = List(1, 2, 3, 4, 5)
+    val pr1: Par[Boolean] = parForAll(l)(a => a%2 == 0)
+    val pr2: Par[Boolean] = parForall(l)(a => a%2 == 0)
+
+    map(pr1)(r => {
+      println(r)
+      r
+    })
+
+    map(pr2)(r => {
+      println(r)
+      r
+    })
+  }
 
 }
 
@@ -218,8 +251,9 @@ object Q9 {
 } // Q9
 
 object Main extends App { 
-  Q1.printTest
-  Q2.printTest
-  Q3.printTest
+  //Q1.printTest
+  //Q2.printTest
+  //Q3.printTest
+  Q5.printTest
 }
 

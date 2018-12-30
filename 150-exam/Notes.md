@@ -255,8 +255,48 @@ case class Failure[A](t: Throwable) extends Try[A]
       - new "seed" to run is the "next" on the same state 
 ## Algebraic Design
 - the following 3 chapters have been introduced as part of AD
+    - the process of designing purely functional libraries
 - parser combinators is heavily focused on AD and contains exercises related to designing a library
+- API can be described by and algebra and obey specific $laws$
 ### Par
+- purely functional library for parallel and asynchronous computations
+- seperate the concern from *describing* a computation to actually *running* it
+- *describe*
+  - ```def unit[A](a: => A): Par[A]```
+    - take an unevaluated $A$ 
+    - return a computation that might evaluate in a seperate *thread*
+        - ```(es: ExecutorService) => UnitFuture(a)```
+            - wrap it in a future task (something that will get evaluated eventually)
+- *extract*
+    - ```def get[A](a: Par[A]): A```
+        - get resulting value from a parallel computation
+- combine asynchronous computations without waiting for them to finish
+    - avoid combining ```unit``` and ```get```
+- ```type Par[A] = ExecutorService => Future[A]```
+    - takes an executor service and wraps A in a future
+-  ```def run[A] (es: ExecutorService) (a: Par[A]) : Future[A] = a(es)```
+- $unit$
+    - creates computation that immediately results in the value $a$
+- $fork$
+  - marks a computation for concurrent evaluation
+  - evaluation won't occur until forces by run
+- $lazyUnit$
+    - wraps it's unevaluated arguement in a $Par$ and marks it for concurrent evaluation
+    - ```fork(unit(a))```
+- $run$
+    - fully evaluates given $Par$ 
+    - spawns parallel computations as requested by $fork$
+    - extracts the resulting value
+- $map2$
+    - combines the result of 2 parallel computations with a $binary$ function
+    - does not evaluate the call to $f$ in a seperate logical thread
+    - $fork$ is controlling all parallelism
+    - ```fork(map2(a, b)(f))```
+        - if we want the evaluation of $f$ to occur in a seperate thread   
+- $parMap$
+    - combines $N$ parallel computations
+    - apply a function $f$ to every element in a collection $simultaneously$
+- $parFilter$
 ### Property Testing
 #### Generators
 #### Laws
