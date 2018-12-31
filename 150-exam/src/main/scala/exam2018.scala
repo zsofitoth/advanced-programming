@@ -235,6 +235,10 @@ object Q7 {
     implicitly[Monad[M]].map2( mcd2, cs)((c2d, c) => applyFully(c2d, c))
   }
 
+  /*def map4monad[M[_]: Monad, A, B, C, D, E](as: M[A], bs: M[B], cs: M[C], ds: M[D])(f: (A,B,C,D) => E): M[E] = {
+
+  }*/
+
 } // Q7
 
 
