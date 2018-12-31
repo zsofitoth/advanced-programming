@@ -185,16 +185,6 @@ object Q5 {
     val l: List[Int] = List(1, 2, 3, 4, 5)
     val pr1: Par[Boolean] = parForAll(l)(a => a%2 == 0)
     val pr2: Par[Boolean] = parForall(l)(a => a%2 == 0)
-
-    map(pr1)(r => {
-      println(r)
-      r
-    })
-
-    map(pr2)(r => {
-      println(r)
-      r
-    })
   }
 
 }

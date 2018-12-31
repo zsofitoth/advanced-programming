@@ -6,10 +6,21 @@
     - where $n$ is start and $m$ is end
   - ```List.fill(n)("foo")``` 
     - where $n$ is the number of times it needs to be filled
+  - ```List.flatten```
+    - ```val l: List[Int] = List(List(1,2), List(3,4))```
+    - ```l.flatten```
+        - ```List(1, 2, 3, 4)```        
 - referential transparency (RT)
 - higher order functions
 - recursion, tail recursion
-- compose, curried functions
+- compose
+- curried functions
+- partial curry
+  - $f: (A, B, C) => D$
+  - ```def partialCurry(a: A, b: B)(c: C): D = f(a, b, c)```
+    - ``` val c2d: List[C => D] = map2(la, lb)((a, b) => partialCurry(a, b))```     
+  - ```def applyF(g: C => D, c: C): D = g(c)```
+    - ```map2(c2d, lc)((c2d, lc) => applyFunc(c2d, c))``` 
 - parametric polymorphism
 - pattern matching
 - covariant
@@ -283,6 +294,8 @@ case class Failure[A](t: Throwable) extends Try[A]
 - $lazyUnit$
     - wraps it's unevaluated arguement in a $Par$ and marks it for concurrent evaluation
     - ```fork(unit(a))```
+    - ```asyncF[A,B] (f: A => B) : A => Par[B]```
+        - async function that takes a function and converts it to that evaluates it result asynchronously 
 - $run$
     - fully evaluates given $Par$ 
     - spawns parallel computations as requested by $fork$
@@ -300,13 +313,35 @@ case class Failure[A](t: Throwable) extends Try[A]
     - apply a function $f$ to every element in a collection $simultaneously$
 - $parFilter$
     - filters in parallel
+    - ```List[Par[List[A]]]``` when ```map```and ```asyncF```
+        - ```Nil: List[A]``` exists but ```Nil: A``` does not
+        - ```map``` and apply ```sequence()``` and ```_.flatten```
 - $map3$ 
   - via ```map2()```
+  - partially apply function
+  - partial curry
+    - ```def partialCurry(a: A, b: B)(c: C): D = f(a, b, c)```
+        - ```val c2d: C => D  = partialCurry(a, b)```
+    - ```def applyFully(g: C => D, c: C): D = g(c)```
 - $sequence$
-  - via ```map2()```
+  - via ```foldRight``` and ```map2()```
+- $choiceN$
+- $choice$
+    - choose between two forking computations based on the result of an initial computation
+    - ```def choice[A](cond: Par[Boolean])(t: Par[A], f: Par[A]): Par[A]```
 - $chooser$
+    - ```def chooser[A,B](p: Par[A])(choices: A => Par[B]): Par[B]```
 - $join$
-- $flatMap$ 
+    - flattens nested $Par[Par[A]]$
+    - ```def join[A](a: Par[Par[A]]): Par[A]```
+- $flatMap$
+    - mapping $f: A => Par[B]$ over $Par[A]$ which generates a $Par[Par[B]]$ and then $flattening$ this nested $Par[Par[B]]$ to a $Par[B]$
+      - ```join(map(p)(f))``` 
+### Laws
+- ```map(unit(x))(f) == unit(f(x))```
+- ```map(unit(x))(id) == unit(id(x))```
+- ```map(y)(id) == y```
+- ```fork(x) == x```
 ### Property Testing
 #### Generators
 #### Laws
