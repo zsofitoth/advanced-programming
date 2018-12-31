@@ -14,14 +14,38 @@ import monocle.Lens
 
 object Q1 { 
 
-  def hasKey[K,V] (l: List[(K,V)]) (k: K) :Boolean = ???
+  //Given an association list l and a key k, 
+  //it should return true iff there exist an element with that key on the list
+  def hasKey[K,V] (l: List[(K,V)]) (k: K) :Boolean = l match {
+    case Nil => false
+    case h::t => if(h._1 == k) true else hasKey(t)(k)
+  }
 
-  def reduceByKey[K,V] (l :List[(K,V)]) (ope: (V,V) => V) :List[(K,V)] = ???
+  //combining values with the same key component using the reduction operator ope
+  def reduceByKey[K,V] (l :List[(K,V)]) (ope: (V,V) => V) :List[(K,V)] = {
+    l.foldRight(Nil: List[(K, V)])((h, t) => {
+      if(!hasKey(t)(h._1)){
+        h::t 
+      } else {
+        t.map(el => {
+          if(el._1 == h._1) (el._1, ope(el._2, h._2))
+          else el
+        })
+      }
+    })
+  }
 
   def separate (l :List[(Int,List[String])]) :List[(Int,String)] =
     l flatMap { idws => idws._2 map { w => (idws._1,w) } }
 
-  def separateViaFor (l :List[(Int,List[String])]) :List[(Int,String)] = ???
+  //def separateViaFor (l :List[(Int,List[String])]) :List[(Int,String)] = ???
+
+  def printTest: Unit = {
+      val l: List[(Int, Int)] = List((1,2), (2,3), (1,5), (2,3), (3, 5), (4, 2))
+      println(hasKey(l)(5))
+      println(hasKey(l)(1))
+      println(reduceByKey(l)(_+_))
+  }
 
 } // Q1
 
@@ -126,4 +150,11 @@ object Q8 {
   // C. ...
 
 } // Q8
+
+object Main2017 extends App { 
+  Q1.printTest
+  //Q2.printTest
+  //Q3.printTest
+  //Q5.printTest
+}
 
