@@ -228,7 +228,12 @@ object Q7 {
     map2(ld2e, ds)((d2e, d) => applyFully(d2e, d))
   }
 
-  // def map3monad ...
+  def map3monad[M[_]: Monad, A, B, C, D](as :M[A], bs: M[B], cs: M[C]) (f: (A,B,C) => D) :M[D] = {
+    def partialCurry(a: A, b: B)(c: C): D = f(a, b, c)
+    val mcd2: M[C => D] = implicitly[Monad[M]].map2(as, bs)((a, b) => partialCurry(a: A, b: B))
+    def applyFully(g: C => D, c: C): D = g(c)
+    implicitly[Monad[M]].map2( mcd2, cs)((c2d, c) => applyFully(c2d, c))
+  }
 
 } // Q7
 

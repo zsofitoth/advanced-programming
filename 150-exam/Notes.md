@@ -1,6 +1,7 @@
 **Zsófia Tóth.** *December, 2018*
 # AP Cheat Sheet
 ## Basics
+- [List](https://www.scala-lang.org/api/2.7.3/scala/List.html)
 - useful list operations
   - ```List.range(n, m)``` 
     - where $n$ is start and $m$ is end
@@ -199,6 +200,7 @@ case class Success[A](a: A) extends Try[A]
 case class Failure[A](t: Throwable) extends Try[A]
 ```
 ## Options
+- [Docs](https://www.scala-lang.org/api/2.7.3/scala/Option.html)
 - ```Some("value")```and ```None```
 - for comprehensions
     - ```for { } yield ()```
@@ -207,7 +209,12 @@ case class Failure[A](t: Throwable) extends Try[A]
 - ```Either[+A, +B]```
     - ```Left```; error
     - ```Right```; result
+- ```getOrElse```
+    - ```def getOrElse[B >: A](default: ⇒ B): B```
+- ```orElse```
+    - ```def orElse[B >: A](alternative: ⇒ Option[B]): Option[B]```
 ## Streams
+- [Docs](https://www.scala-lang.org/api/2.7.3/scala/Stream.html)
 - infinite streams
     - ```from```
     - ```to```
@@ -408,8 +415,11 @@ case class Failure[A](t: Throwable) extends Try[A]
 - $addition$, $multiplication$, $max$ (-infinity), $min$ (+infinity)
 - $||$ (false), $\&\&$ (true)
 - $concatenation$, $append$
-- $Option$ (None)
+- $Option$ 
+    - None
+    - ```orElse```
 - $endomonoid$
+  - function having the same argument and return type is called an endofunction 
 ### Foldables
 - ```F[_]``` is the type constructor
     - one arguement
@@ -429,5 +439,6 @@ case class Failure[A](t: Throwable) extends Try[A]
 - can extend $Functor$
 - $map3monad$ signature
     - ```def map3monad[M[_]: Monad, A,B,C,D] (a :M[A], b: M[B], c: M[C]) (f: (A,B,C) => D) :M[D]```
+    - ```implicitly[Monad[M]]```
 ## Lenses
 ## Finger Trees
