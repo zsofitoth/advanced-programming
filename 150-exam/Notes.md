@@ -387,11 +387,43 @@ case class Failure[A](t: Throwable) extends Try[A]
 #### Laws
 ### Parser Combinators
 ## Functional Design
+- design patterns
 ### Monoids
-- foldables
-### Functors
-- map
-### Monads
-- flatMap
+- set that has
+    - $closed$, $associative$ binary operation
+    - $identity$ element
+- $closed$
+    - $Integers$ are closed with $+$, $-$, $*$, but not $/$
+    - $Positive$ numbers are not closed with $-$ (subtraction)
+- $identity$ element of ...
+    - $List$
+        - $Nil$
+    - $+$
+        - $0$
+    - $*$
+        - $1$
+    - $String$
+       - $""$
+- abstraction
+- $addition$, $multiplication$, $max$ (-infinity), $min$ (+infinity)
+- $||$ (false), $\&\&$ (true)
+- $concatenation$, $append$
+### Foldables
+- ```F[_]``` is the type constructor
+    - one arguement
+### Functors (=Mappable)
+- $map$
+  - when a value is wrapped in a structure, a function cannot be applied to that value
+  - is parameterized on the type constructor F
+### Monads (=FlatMappable Wrapper)
+- wrapper
+  - ```def unit[A] (x: A): Monad[A]```
+- $flatMap$
+    - first ```map```, then ```flatten```
+    - To $flatMap$ an object of type ```M[A]```, ```f: A-> M[B]``` is provided, 
+    - $flatMap$ then uses this function to transform $A$ into $M[B]$, resulting in a $M[M[B]]$, and then it will $flatten$ the whole thing into $M[B]$
+- $unit$ and $flatMap$ as a minimal setting
+- $map$, or $map2$ can be defined via $flatMap$
+- can extend $Functor$
 ## Lenses
 ## Finger Trees

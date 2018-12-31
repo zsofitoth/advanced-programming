@@ -136,7 +136,20 @@ object Q4 {
     case _ => s
   }
 
-  def simulateMachine (initial: MachineState) (inputs: List[Input]) :(Int,Int) =  ???
+  //should execute the machine based on the list of inputs and return the number of coffee bean portions and coins accumulated at the end.
+  def simulateMachine (initial: MachineState) (inputs: List[Input]): (Int,Int) =  inputs match {
+    case Nil => (initial.coffee, initial.coins)
+    case h::t => simulateMachine(step(h)(initial))(t)
+  }
+
+  //STATE[MachineState, (Int, Int)]
+  //OFFICIAL SOLUTION
+  def simulateMachine2(initial: MachineState) (inputs: List[Input]): (Int,Int) = {
+    val ms: List[State[MachineState,Unit]] = inputs map (i => State.modify (step (i)))
+    val m: State[MachineState,Unit] = State sequence (ms) map (_ => Unit)
+    val MachineState(ready,coffee,coins) = (m run initial)._2
+    (coffee,coins)
+  }
 
 } // Q4
 
