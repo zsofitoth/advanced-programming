@@ -140,10 +140,24 @@ case object Nil extends List[Nothing]
 case class Cons[+A](head: A, tail: List[A]) extends List[A]
 ```
 ##### Tree
+- binary tree type
+    - embeds simple elements of type $A$ in the internal nodes
 ```Scala
 sealed trait Tree[+A]
 case class Leaf[A] (value: A) extends Tree[A]
 case class Branch[A] (left: Tree[A], right: Tree[A]) extends Tree[A]
+```
+- list of tree
+- binary tree type 
+    - embeds lists of elements of type $A$ in the internal nodes
+```Scala
+trait TreeOfLists[+A]
+case object LeafOfLists  extends TreeOfLists[Nothing]
+case class BranchOfLists[+A] (
+    data: List[A],
+    left: TreeOfLists[A],
+    right: TreeOfLists[A]
+) extends TreeOfLists[A]
 ```
 ##### Stream
 ```Scala

@@ -77,9 +77,14 @@ object Q2 {
     right: TreeOfLists[A]
   ) extends TreeOfLists[A]
 
-  // trait TreeOfCollections[...]
-  // case class LeafOfCollections ...
-  // case class BranchOfCollections ...
+  //Generalize these types to use any generic collection C[_] instead of List[_]
+  trait TreeOfCollections[C[+_], +A]
+  case class LeafOfCollections[C[+_]] () extends TreeOfCollections[C, Nothing]
+  case class BranchOfCollections[C[+_], +A](
+    data: C[A],
+    left: TreeOfCollections[C, A],
+    right:TreeOfCollections[C, A]
+  ) extends TreeOfCollections[C, A]
 
   def map[A,B] (t: TreeOfLists[A]) (f: A => B) :TreeOfLists[B] = t match {
     case LeafOfLists => LeafOfLists
