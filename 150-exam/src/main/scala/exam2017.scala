@@ -38,13 +38,30 @@ object Q1 {
   def separate (l :List[(Int,List[String])]) :List[(Int,String)] =
     l flatMap { idws => idws._2 map { w => (idws._1,w) } }
 
-  //def separateViaFor (l :List[(Int,List[String])]) :List[(Int,String)] = ???
+  def separateViaFor (l :List[(Int,List[String])]) :List[(Int,String)] = 
+    for {
+      idws <- l
+      w <- idws._2
+    } yield((idws._1, w))
 
   def printTest: Unit = {
       val l: List[(Int, Int)] = List((1,2), (2,3), (1,5), (2,3), (3, 5), (4, 2))
       println(hasKey(l)(5))
       println(hasKey(l)(1))
       println(reduceByKey(l)(_+_))
+
+    val l2: List[(Int, List[String])] = List(
+      (1,List("Hello", "How", "are", "you")), 
+      (2,List("w1", "w3")), 
+      (1,List("a1", "b3")), 
+      (2,List("t3")), 
+      (3,List("y1", "y3", "grsa")), 
+      (4,List("d1", "d3"))
+    )
+
+    println(separate(l2))
+    println(separateViaFor(l2))
+
   }
 
 } // Q1
