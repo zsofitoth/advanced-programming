@@ -207,11 +207,26 @@ object Q6 {
 
 object Q7 {
 
-  def map2[A,B,C] (a :List[A], b: List[B]) (f: (A,B) => C): List[C] = ???
+  def map2[A,B,C] (as :List[A], bs: List[B]) (f: (A,B) => C): List[C] = 
+    for {
+      a <- as
+      b <- bs
+    } yield(f(a,b)) 
 
 
-  def map3[A,B,C,D] (a :List[A], b: List[B], c: List[C]) (f: (A,B,C) => D) :List[D] = ???
+  def map3[A,B,C,D] (as :List[A], bs: List[B], cs: List[C]) (f: (A,B,C) => D) :List[D] = {
+    def partialCurry(a: A, b: B)(c: C): D = f(a, b, c)
+    val lc2d: List[C => D]  = map2(as, bs)((a, b) => partialCurry(a, b))
+    def applyFully(g: C => D, c: C): D = g(c)
+    map2(lc2d, cs)((c2d, c) => applyFully(c2d, c))
+  }
 
+  def map4[A,B,C,D,E](as: List[A], bs: List[B], cs: List[C], ds: List[D])(f: (A,B,C,D) => E): List[E] = {
+    def partialCurry(a: A, b: B, c: C)(d: D): E = f(a, b, c, d)
+    val ld2e: List[D => E] = map3(as, bs, cs)((a, b, c) => partialCurry(a, b, c))
+    def applyFully(g: D => E, d: D): E = g(d)
+    map2(ld2e, ds)((d2e, d) => applyFully(d2e, d))
+  }
 
   // def map3monad ...
 

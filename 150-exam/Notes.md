@@ -303,7 +303,7 @@ case class Failure[A](t: Throwable) extends Try[A]
       ```
       - construct a stream from the next value (a)
       - new "seed" to run is the "next" on the same state 
-## Algebraic Design
+## Algebraic Design (Functional Design)
 - the following 3 chapters have been introduced as part of AD
     - the process of designing purely functional libraries
 - parser combinators is heavily focused on AD and contains exercises related to designing a library
@@ -386,7 +386,7 @@ case class Failure[A](t: Throwable) extends Try[A]
 #### Generators
 #### Laws
 ### Parser Combinators
-## Functional Design
+## Functional Design (Patterns)
 - design patterns
 ### Monoids
 - set that has
@@ -408,6 +408,8 @@ case class Failure[A](t: Throwable) extends Try[A]
 - $addition$, $multiplication$, $max$ (-infinity), $min$ (+infinity)
 - $||$ (false), $\&\&$ (true)
 - $concatenation$, $append$
+- $Option$ (None)
+- $endomonoid$
 ### Foldables
 - ```F[_]``` is the type constructor
     - one arguement
@@ -425,5 +427,7 @@ case class Failure[A](t: Throwable) extends Try[A]
 - $unit$ and $flatMap$ as a minimal setting
 - $map$, or $map2$ can be defined via $flatMap$
 - can extend $Functor$
+- $map3monad$ signature
+    - ```def map3monad[M[_]: Monad, A,B,C,D] (a :M[A], b: M[B], c: M[C]) (f: (A,B,C) => D) :M[D]```
 ## Lenses
 ## Finger Trees
