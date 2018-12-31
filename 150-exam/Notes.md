@@ -215,7 +215,10 @@ case class Failure[A](t: Throwable) extends Try[A]
 - finite streams
 - ```unfold```
     - ```def unfold[A, S](z: S)(f: S => Option[(A, S)]): Stream[A]```
-- lazily evaluated
+- lazily evaluation
+  - when an expression is passed as a parameter to a function, it is not evaluated before entering the function body 
+  - evaluated when it is accessed/read the first time inside the function
+  - if the result of such expression is never used inside, then it will never be evaluated
 - ```append```
     - ```def append[B >: A](that: => Stream[B]): Stream[B]```
     -  lower type bound
@@ -224,7 +227,17 @@ case class Failure[A](t: Throwable) extends Try[A]
        -  the result is a stream of $B$ elements
     -  ```[B <: A]``` is an upper type bound
         - $B$ is constrained to be a subtype of $A$
-- library function implementations with ```foldRight``` and $pattern$ $matching$ 
+- library function implementations with ```foldRight``` and $pattern$ $matching$
+- $callByValue$
+  - default
+  - eager evaluation
+- $callByName$
+  - lazy evaluation
+- $callByNeed$
+  - lazy evaluation
+  - Haskell
+  - a memoized variant of call by name where, if the function argument is evaluated, that value is stored for subsequent uses 
+  - if the argument is side-effect free, this produces the same results as call by name, saving the cost of recomputing the argument
 ## State
 - **RNG**
     - ```SimpleRNG```
@@ -334,6 +347,7 @@ case class Failure[A](t: Throwable) extends Try[A]
         - if we want the evaluation of $f$ to occur in a seperate thread   
 - $map$
     - via ```map2(pa, unit(()))((a,_) => f(a))```
+    - ```map( Par[List[A]] )( List[A] => Boolean/Int/... )```
 - $parMap$
     - combines $N$ parallel computations
     - apply a function $f$ to every element in a collection $simultaneously$
@@ -348,7 +362,7 @@ case class Failure[A](t: Throwable) extends Try[A]
   - partial curry
     - ```def partialCurry(a: A, b: B)(c: C): D = f(a, b, c)```
         - ```val c2d: C => D  = partialCurry(a, b)```
-    - ```def applyFully(g: C => D, c: C): D = g(c)```
+    - ```def applyFully(g: C => D, c: C): D = g(c)```   
 - $sequence$
   - via ```foldRight``` and ```map2()```
 - $choiceN$

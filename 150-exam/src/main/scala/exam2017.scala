@@ -121,7 +121,20 @@ object Q4 {
 
   case class MachineState (ready: Boolean, coffee: Int, coins: Int)
 
-  def step (i: Input) (s: MachineState) :MachineState =  ???
+  def step (i: Input) (s: MachineState) : MachineState = (i, s) match {
+    // Ignore all the input if it contains no coffee beans (no state change)
+    case (_, MachineState(_, 0, _)) => s
+    // Inserting a coin into a machine causes it to become busy. It also increases the number of coins accumulated
+    case(Coin, MachineState(r, cb, c)) if(r && cb > 0) => MachineState(false, cb, c + 1)
+    // Pressing Brew on a busy machine will cause it to deliver a cup of coffee (which changes the state by taking one coffee portion away) and return to the ready state
+    case(Brew, MachineState(r, cb, c)) if(!r && cb > 0) => MachineState(true, cb - 1, c ) 
+    // Pressing Brew on a machine which is not busy (a ready machine) has no effect
+    case(Brew, MachineState(r, _, _)) if(r) => s
+    // Inserting two or more coins in a row is possible, but you will only get one coffee anyway. The machine
+    // is a bit simplistic: the new coin is just gladly consumed
+    //case(i: Coin, MachineState(r, cb, c)) if(i > 1 && r && cb > 0 ) => MachineState(false, cb, c + 1) <- does not compile
+    case _ => s
+  }
 
   def simulateMachine (initial: MachineState) (inputs: List[Input]) :(Int,Int) =  ???
 
@@ -130,14 +143,38 @@ object Q4 {
 
 object Q5 {
 
-  def flatten[A] (s: =>Stream[List[A]]) :Stream[A] = ???
+  // Implement a function flatten that converts a Stream[List[A]] to a Stream[A] in the obvious way (as if the
+  // lists were `concatenated into a single stream`). Do so carefully, to avoid forcing the next list in the stream if
+  // not necessary. It is fine to force the head of the stream always (as often done earlier in the course), but do not
+  // force deeper elements
+  
+  def flatten[A] (s: => Stream[List[A]]) :Stream[A] = 
+    s.flatMap(as => as.foldRight(Empty: Stream[A])((h,t) => cons(h,t)))
+
+  // TRICK IS:
+  // convert List to stream
+
+  def printTest: Unit = {
+    
+    val sas: Stream[List[Int]] = Stream(List(1,2), List(2,3), List(1,5), List(2,3), List(3, 5), List(4, 2))
+    //Convert list to stream! List(1,2).toStream
+    val r: Stream[Int] = sas.flatMap(as => Stream(as: _*))
+    val r2: Stream[Int] = sas.flatMap(as => as.foldRight(Empty: Stream[Int])((h,t) => cons(h,t)))
+
+    println(r2.toList)
+
+  }
 
 } // Q5
 
 
 object Q6 {
 
-  def parExists[A] (as: List[A]) (p: A => Boolean): Par[Boolean] = ???
+  def parExists[A] (as: List[A]) (p: A => Boolean): Par[Boolean] = {
+    val pas: Par[List[A]] = parFilter(as)(a => p(a))
+    val isTrue: Par[Boolean] = map(pas)(l => l.length > 0)
+    isTrue
+  }
 
 } // Q6
 
@@ -177,6 +214,6 @@ object Main2017 extends App {
   Q1.printTest
   //Q2.printTest
   //Q3.printTest
-  //Q5.printTest
+  Q5.printTest
 }
 
