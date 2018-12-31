@@ -147,9 +147,9 @@ sealed trait Tree[+A]
 case class Leaf[A] (value: A) extends Tree[A]
 case class Branch[A] (left: Tree[A], right: Tree[A]) extends Tree[A]
 ```
-- list of tree
 - binary tree type 
     - embeds lists of elements of type $A$ in the internal nodes
+    - list of tree
 ```Scala
 trait TreeOfLists[+A]
 case object LeafOfLists  extends TreeOfLists[Nothing]
@@ -158,6 +158,18 @@ case class BranchOfLists[+A] (
     left: TreeOfLists[A],
     right: TreeOfLists[A]
 ) extends TreeOfLists[A]
+```
+- binary tree type
+    - embeds a collection of elements
+    - generalized $TreeOfLists$ to use $any$ generic collection ```C[_]```
+```Scala
+trait TreeOfCollections[C[+_], +A]
+case class LeafOfCollections[C[+_]] () extends TreeOfCollections[C, Nothing]
+case class BranchOfCollections[C[+_], +A](
+  data: C[A],
+  left: TreeOfCollections[C, A],
+  right:TreeOfCollections[C, A]
+) extends TreeOfCollections[C, A]
 ```
 ##### Stream
 ```Scala
