@@ -46,7 +46,12 @@
 - ```flatMap```
     - ```def flatMap[B] (f: A => List[B]) : List[B]```
     - ```foldRight``` + appending
-        - ```foldRight(Nil: Empty[B])((h,t) => f(h):::(t))```  
+        - ```foldRight(Nil: Empty[B])((h,t) => f(h):::(t))```
+    - $flatMap$ can be implemented via $map$
+      - $State$
+        - ```flatMap (a => State.unit(f(a)))```
+      - $Gen$
+        - ```flatMap (a => Gen.unit(f(a)))```
 - ```filter```
     - ```def filter(f: A => Boolean): List[A]```
         - ```foldRight```   
@@ -391,9 +396,66 @@ case class Failure[A](t: Throwable) extends Try[A]
 - ```map(y)(id) == y```
 - ```fork(x) == x```
 ### Property Testing
+- [Scala Check](https://github.com/rickynils/scalacheck/blob/master/doc/UserGuide.md)
+    - define a property that specifies the behaviour of a method or some unit of code
+    - all test data are generated automatically in a random fashion
+    - $forAll$
+        - creates universally quantified properties directly
+            - takes a function as parameter, and creates a property out of it that can be tested with the ```check``` method
+                - ```p1.check```
+            - function should return ```Boolean``` or another property, and can take parameters of any types
+        - used the most
+        - combining existing properties into a new one
+            - $p1 \&\& p2$
+            - $p1 || p2$
 #### Generators
-#### Laws
+- [Scala Check's Gen](https://www.scalacheck.org/files/scalacheck_2.11-1.14.0-api/index.html#org.scalacheck.Gen$)
+- ```val intList: Gen[List[Int]] = Gen.listOf(Gen.choose(0, 100))```
+    - a $generator$ of a list of integers between $0$ and $100$
+- combine $generators$ with ```for {} yield()```
+- $Arbitrary$ generator
+  - ```val evenInteger = Arbitrary.arbitrary[Int] suchThat (_ % 2 == 0)```
+- homework implemets this with $State$
+  - stays RT and pure
+  - $Gen.choose(n,m)$ - random number between start and stop
+    ```Scala
+    def choose (start: Int, stopExclusive: Int): Gen[Int] = {
+        Gen(State(rng => RNG.nonNegativeInt(rng) match {
+            case (value, next) => ( value % (stopExclusive-start) + start , next )
+        }))
+    }
+    ```
+  - $Gen.boolean$ - random ```true``` or ```false```
+    ```Scala
+    def boolean: Gen[Boolean] = Gen(State(rng => RNG.boolean(rng)))
+    ```
+  - $Gen.double$ - random double
+    ```Scala
+    def double: Gen[Double] = Gen(State(rng => RNG.double(rng)))
+    ```
+  - $Gen.listOfN$
+    - using ```sequence``` and ```List.fill(n)(this.sample)```
+    - ```def sequence[S, A](sas: List[State[S, A]]): State[S, List[A]]```
+  - use case of $flatMap$
+  ```Scala
+    def listOfN (size: Gen[Int]): Gen[List[A]] = 
+        size.flatMap(n => listOfN(n))
+  ```
+  - coin toss (**this** or **that**)
+  ```Scala
+    def union (that: Gen[A]): Gen[A] = 
+        Gen.boolean.flatMap(x => if(x) this else that)
+  ```
+#### Properties
+  - ```val prop1 = forAll(intList)(ns => ns.reverse.reverse == ns)```
+  - ```val prop2 = forAll(intList)(ns => ns.reverse.headOption == ns.lastOption)```
+    - passing properties
+  - ```val prop3 = forAll(intList)(ns => ns.reverse == ns)```
+- $Gen$ is essentially a wrapped State of special kind
 ### Parser Combinators
+- $AD^2$
+  - lots of design decisions
+  - design chapter
 ## Functional Design (Patterns)
 - design patterns
 ### Monoids
@@ -536,3 +598,6 @@ case class Failure[A](t: Throwable) extends Try[A]
         - $deepL$
         - $deepR$
         - $toTree$
+- ```Digit.toTree(FingerTree.toList.listOperation)```
+    - ```filter```
+    - ```map```   
