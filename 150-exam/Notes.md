@@ -484,9 +484,12 @@ case class Failure[A](t: Throwable) extends Try[A]
             - intermediate results are combined by using a $binary$ $operation$
         - $skewed$ reduction
             - only nested to the *right* or to the *left*
-    - $dequeue$ $operations$
-    - $concatenation$
-    - (splitting operations)
+    - dequeue operations
+        - $concatenation$
+            - polymorphic recursion
+            - $addL$
+            - $addR$
+        - $splitting$
 - $isomorphic$ monoid type
     - via **newtype** declaration for each monoid structure of interest
 - numerical representation hence $Digit(a)$
