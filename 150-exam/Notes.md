@@ -516,8 +516,14 @@ case class Failure[A](t: Throwable) extends Try[A]
   - $Empty$
     - ```case class Empty () extends FingerTree[Nothing]```
   - $Single$
+    - takes
+      - data: $A$ 
     - ```case class Single[A] (data: A) extends FingerTree[A]```
   - $Deep$
+    - takes
+        - pr: $Digit[A]$
+        - m: $FingerTree[Node[A]]$
+        - sf: $Digit[A]$
     - ``` case class Deep[A] (pr: Digit[A], m: FingerTree[Node[A]], sf: Digit[A]) extends FingerTree[A]```
   - Operations on $Empty$, $Single$ and $Deep$
         - $reduceR$

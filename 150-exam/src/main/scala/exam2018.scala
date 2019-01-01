@@ -244,7 +244,17 @@ object Q7 {
 
 object Q8 {
 
-  def filter[A] (t: FingerTree[A]) (p: A => Boolean): FingerTree[A] = ???
+  /* ZSÒFIA's solution, sadly, does not compile and has many type errors :/
+  def filter[A] (t: FingerTree[A]) (p: A => Boolean): FingerTree[A] = t match {
+    case Empty () => Empty ()
+    case Single(a) => if(p(a)) Single(a) else Empty ()
+    case Deep(pr, m, sf) => Deep(pr.filter(p), filter(m)(p), sf.filter(p))
+  }
+  */
+
+  def filter2[A] (t: FingerTree[A]) (p: A => Boolean): FingerTree[A] = {
+    Digit.toTree(t.toList.filter(p))
+  }
 
 }
 
