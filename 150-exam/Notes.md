@@ -397,6 +397,7 @@ case class Failure[A](t: Throwable) extends Try[A]
 ## Functional Design (Patterns)
 - design patterns
 ### Monoids
+- abstraction
 - set that has
     - $closed$, $associative$ binary operation
     - $identity$ element
@@ -404,18 +405,19 @@ case class Failure[A](t: Throwable) extends Try[A]
     - $Integers$ are closed with $+$, $-$, $*$, but not $/$
     - $Positive$ numbers are not closed with $-$ (subtraction)
 - $identity$ element of ...
-    - $List$
-        - $Nil$
-    - $+$
+    - $+$; addition
         - $0$
-    - $*$
+    - $*$; multiplication
         - $1$
-    - $String$
-       - $""$
-- abstraction
-- $addition$, $multiplication$, $max$ (-infinity), $min$ (+infinity)
+- $max$ (-infinity), $min$ (+infinity)
 - $||$ (false), $\&\&$ (true)
 - $concatenation$, $append$
+    - $List$
+        - $Nil$
+    - $String$
+       - $""$
+    - $Finger Tree$
+        - $Empty$
 - $Option$ 
     - None
     - ```orElse```
@@ -500,6 +502,7 @@ case class Failure[A](t: Throwable) extends Try[A]
       - ```foldRight```
     - $reduceL$
       - ```foldLeft```
+    - $toList$
 - $Node$
     - ```sealed trait Node[+A]```
     - ```object Node extends Reduce[Node]```
@@ -507,7 +510,7 @@ case class Failure[A](t: Throwable) extends Try[A]
         - ```case class Node2[A] (l :A, r :A) extends Node[A]```
     - $Node3$
         - ```case class Node3[A] (l: A, m: A, r: A) extends Node[A]```
-    - Operations on $Node2$ and $Node3$
+    - Operations(under ```object```)
         - $reduceR$
         - $reduceL$
 - $FingerTree$
@@ -525,6 +528,11 @@ case class Failure[A](t: Throwable) extends Try[A]
         - m: $FingerTree[Node[A]]$
         - sf: $Digit[A]$
     - ``` case class Deep[A] (pr: Digit[A], m: FingerTree[Node[A]], sf: Digit[A]) extends FingerTree[A]```
-  - Operations on $Empty$, $Single$ and $Deep$
+  - Operations (under ```object```)
         - $reduceR$
         - $reduceL$
+        - $addL$
+        - $addR$
+        - $deepL$
+        - $deepR$
+        - $toTree$

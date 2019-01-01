@@ -203,8 +203,10 @@ object Q7 {
   // }
 
   // Implement this:
-
-  def concatenate[A, B >: A] (left: FingerTree[A]) (right: FingerTree[B]) :FingerTree[B] = ???
+  def concatenate[A, B >: A] (left: FingerTree[A]) (right: FingerTree[B]) :FingerTree[B] = {
+    Digit.toTree(left.toList ::: right.toList)
+  }
+    
 
 } // Q7
 
