@@ -47,7 +47,7 @@
     - ```def flatMap[B] (f: A => List[B]) : List[B]```
     - ```foldRight``` + appending
         - ```foldRight(Nil: Empty[B])((h,t) => f(h):::(t))```
-    - $flatMap$ can be implemented via $map$
+    - $map$ can be implemented via $flatMap$
       - $State$
         - ```flatMap (a => State.unit(f(a)))```
       - $Gen$
