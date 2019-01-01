@@ -54,6 +54,7 @@
     - apply a binary $op$ to each element from both lists at the *same* position 
     - ```def zipWith[A,B,C] (f: (A,B)=>C) (l: List[A], r: List[B]): List[C]```   
 ### Folding
+- $reduction$
 - fold "is the new" pattern matching with recursion
 - $z$: *initial element*
 - $op$: ```f: (A, B) => B```
@@ -440,5 +441,81 @@ case class Failure[A](t: Throwable) extends Try[A]
 - $map3monad$ signature
     - ```def map3monad[M[_]: Monad, A,B,C,D] (a :M[A], b: M[B], c: M[C]) (f: (A,B,C) => D) :M[D]```
     - ```implicitly[Monad[M]]```
+#### Monadic Evaluators
+- research paper
+- Haskell to Scala
+- variation 1 and 2
+  - basic evaluator
+  - exceptions
+  - state
+  - output
 ## Lenses
+- research paper
 ## Finger Trees
+- research paper
+  - Haskell
+- binary search tree (worst case)
+  - $O(n)$
+- 2 - 3 finger trees
+  - sequence supporting access 
+    - ends in amortized constant time
+    - reduce $O(n)$ to $O(1)$
+  - concatenation and splitting
+    - $O(log(n))$ in the time of the smaller piece
+- balanced
+- nodes of Finger Tree - spine
+- nodes of 2-3 tree
+  - node has 2 or 3 leaves
+  - all leaves at the same level
+  - ```Node a = Node2 a a | Node3 a a a```
+- nodes of digits - fingers
+- makes use of $laziness$
+    - we implemented as an eager data structure
+- have an efficient list like data structure
+    - can serve as 
+        - $Sequence$
+        - $Priority$ $Queue$
+        - $Search$ $Tree$
+        - $Priority$ $Search$ $Queue$
+- $Op$
+    - $reduction$
+        - a function that collapses a structure of type $F[A]$ into a single value of type $A$
+            - empty subtrees are replaced by constants
+            - intermediate results are combined by using a $binary$ $operation$
+        - $skewed$ reduction
+            - only nested to the *right* or to the *left*
+    - $dequeue$ $operations$
+    - $concatenation$
+    - (splitting operations)
+- $isomorphic$ monoid type
+    - via **newtype** declaration for each monoid structure of interest
+- numerical representation hence $Digit(a)$
+- $Digit$
+    - ```type Digit[A] = List[A]```
+    - ```object Digit extends Reduce[Digit]```
+    - $reduceR$
+      - ```foldRight```
+    - $reduceL$
+      - ```foldLeft```
+- $Node$
+    - ```sealed trait Node[+A]```
+    - ```object Node extends Reduce[Node]```
+    - $Node2$
+        - ```case class Node2[A] (l :A, r :A) extends Node[A]```
+    - $Node3$
+        - ```case class Node3[A] (l: A, m: A, r: A) extends Node[A]```
+    - Operations on $Node2$ and $Node3$
+        - $reduceR$
+        - $reduceL$
+- $FingerTree$
+  - ```sealed trait FingerTree[+A]```
+  - ```object FingerTree extends Reduce[FingerTree]```
+  - $Empty$
+    - ```case class Empty () extends FingerTree[Nothing]```
+  - $Single$
+    - ```case class Single[A] (data: A) extends FingerTree[A]```
+  - $Deep$
+    - ``` case class Deep[A] (pr: Digit[A], m: FingerTree[Node[A]], sf: Digit[A]) extends FingerTree[A]```
+  - Operations on $Empty$, $Single$ and $Deep$
+        - $reduceR$
+        - $reduceL$
