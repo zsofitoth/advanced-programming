@@ -92,7 +92,10 @@ object Q2 {
         BranchOfLists (data map f, map (left) (f), map (right) (f))
   }
 
-  // def map[...] (t: TreeOfCollections[...]) (f: A => B) ...
+  def map[C[+_], A, B] (t: TreeOfCollections[C, A]) (f: A => B) (implicit functor: Functor[C]) :TreeOfCollections[C, B] = t match {
+    case LeafOfCollections() => LeafOfCollections()
+    case BranchOfCollections(d, l, r) => BranchOfCollections(functor.map(d)(f), map(l)(f), map(r)(f))
+  }
 
 } // Q2
 
@@ -226,9 +229,12 @@ object Q8 {
 } // Q8
 
 object Main2017 extends App { 
-  Q1.printTest
+  //Q1.printTest
   //Q2.printTest
   //Q3.printTest
-  Q5.printTest
+  //Q5.printTest
+  val test: List[Int] = List(List(1,2,3,4,5), List(1,2,3,4,5))
+    .flatMap(as => as)
+  println(test)
 }
 
