@@ -57,7 +57,8 @@
         - ```foldRight```   
 - ```zipWith```
     - apply a binary $op$ to each element from both lists at the *same* position 
-    - ```def zipWith[A,B,C] (f: (A,B)=>C) (l: List[A], r: List[B]): List[C]```   
+    - ```def zipWith[A,B,C] (f: (A,B)=>C) (l: List[A], r: List[B]): List[C]```
+- semi group 
 ### Folding
 - [Docs](https://www.scala-exercises.org/cats/foldable)
 - $reduction$
@@ -94,7 +95,7 @@
 - ```(Byte, Boolean)```
     - $2 × 256 = 512$ 
 - ```(Byte, Unit)```
-    - $1 x 256 = 256$
+    - $1 × 256 = 256$
 - ```(Byte, Byte)```
     - $256 × 256 = 65536$   
 - ```(Byte, Boolean, Boolean)```
@@ -525,6 +526,7 @@ Arbitrary in order to be able to generate random instances
       - law holds for any type $A$ and a typeconstructor ```F[_]```
 ### Monads (=FlatMappable Wrapper)
 - [Docs](https://www.scala-exercises.org/cats/monad)
+- monad transformer
 - wrapper
   - ```def unit[A] (x: A): Monad[A]```
 - $flatMap$
