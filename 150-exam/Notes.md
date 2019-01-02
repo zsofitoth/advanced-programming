@@ -59,6 +59,7 @@
     - apply a binary $op$ to each element from both lists at the *same* position 
     - ```def zipWith[A,B,C] (f: (A,B)=>C) (l: List[A], r: List[B]): List[C]```   
 ### Folding
+- [Docs](https://www.scala-exercises.org/cats/foldable)
 - $reduction$
 - fold "is the new" pattern matching with recursion
 - $z$: *initial element*
@@ -452,6 +453,7 @@ case class Failure[A](t: Throwable) extends Try[A]
     - passing properties
   - ```val prop3 = forAll(intList)(ns => ns.reverse == ns)```
 - $Gen$ is essentially a wrapped State of special kind
+- type constraint ```[A :Arbitrary]``` means that the type $A$ has to implement the $Arbitrary$ trait
 ### Parser Combinators
 - $AD^2$
   - lots of design decisions
@@ -459,6 +461,7 @@ case class Failure[A](t: Throwable) extends Try[A]
 ## Functional Design (Patterns)
 - design patterns
 ### Monoids
+- [Docs](https://www.scala-exercises.org/cats/monoid)
 - abstraction
 - set that has
     - $closed$, $associative$ binary operation
@@ -485,14 +488,43 @@ case class Failure[A](t: Throwable) extends Try[A]
     - ```orElse```
 - $endomonoid$
   - function having the same argument and return type is called an endofunction 
+- $homomorphism$
+    - between monoids $M$ and $N$, for all values $x$ and $y$
+        - ```M.op(f(x), f(y)) == f(N.op(x, y))``` => ```concat(x.length, y.length) == concat(x, y).length```
+            - on $List[A]$ or $String$
+- $isomorphism$
+  - $homomorphism$ in both directions between two monoids
+  - monoid $isomorphism$ between $M$ and $N$ has two $homomorphism$ $f$ and $g$, where both
+    - ```f andThen g```and ```g andThen f```are identity functions
+        - $String$ and $List[Char]$ are $isomorphic$ with concatenation
 ### Foldables
+- [Docs](https://www.scala-exercises.org/cats/foldable)
+- ```trait Foldable[F[_]]```
 - ```F[_]``` is the type constructor
     - one arguement
+- $foldLeft$
+- $foldRight$
+- $foldMap$
+  - ```def foldMap[A, B](as: F[A])(f: A => B)(mb: Monoid[B]) :B```
+  - is similar to $fold$ but maps every $A$ value into $B$ and then combines them using the given $Monoid[B]$ instance
+- $concatenate$
 ### Functors (=Mappable)
+- [Docs](https://www.scala-exercises.org/cats/functor)
+- ```trait Functor[F[_]]```
 - $map$
   - when a value is wrapped in a structure, a function cannot be applied to that value
   - is parameterized on the type constructor F
+-  $implicit$ parameter
+    - ```def mapLaw[A,F[_]] (fn :Functor[F]) (implicit arb: Arbitrary[F[A]]): Prop```
+        - ```forAll { (fa :F[A]) => fn.map[A,A] (fa) (x=>x) == fa }```
+        - it states that when you use this method (mapLaw) there must exist an implicit
+conversion rule from ```F[A]``` instances to ```Arbitrary[F[A]]``` instances
+        - scalacheck needs to know that ```F[A]``` is an instance (or can be made an instance) of
+Arbitrary in order to be able to generate random instances
+    - $F[_]$
+      - law holds for any type $A$ and a typeconstructor ```F[_]```
 ### Monads (=FlatMappable Wrapper)
+- [Docs](https://www.scala-exercises.org/cats/monad)
 - wrapper
   - ```def unit[A] (x: A): Monad[A]```
 - $flatMap$
